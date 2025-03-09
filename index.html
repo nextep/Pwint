@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pwint.ca - Large Format Printing Specialists</title>
+    <style>
+        :root {
+            --cyan: #00bcd4;
+            --magenta: #e91e63;
+            --yellow: #cc9900;
+            --black: #212121;
+            --gradient-primary: linear-gradient(135deg, #00bcd4, #e91e63, #cc9900);
+            --text-dark: #212121;
+            --text-gray: #555555;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            padding: 0 20px;
+            background-color: #ffffff;
+        }
+
+        .hero::before {
+            display: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            max-width: 200px;
+            height: auto;
+        }
+
+        h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: titleAnimation 2s ease-in-out infinite alternate;
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            color: var(--text-dark);
+            font-weight: bold;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .trademark {
+            font-size: 0.8em;
+            color: var(--magenta);
+            margin-top: 10px;
+        }
+
+        .cta-button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            background: var(--gradient-primary);
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin: 10px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            border: 1px solid #eee;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card p {
+            color: var(--text-gray);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .price-highlight {
+            color: var(--magenta);
+            font-weight: bold;
+        }
+
+        .location {
+            text-align: center;
+            padding: 40px 20px;
+            background: #ffffff;
+        }
+
+        .location h2 {
+            color: var(--cyan);
+            margin-bottom: 15px;
+        }
+
+        .location p {
+            color: var(--text-gray);
+            margin-bottom: 20px;
+        }
+
+        @keyframes titleAnimation {
+            from {
+                filter: hue-rotate(0deg);
+            }
+            to {
+                filter: hue-rotate(90deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+            .subtitle {
+                font-size: 1.2em;
+            }
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="hero-content">
+            <div class="logo-container">
+                <img src="pwint.PNG" alt="Pwint.ca" class="logo">
+            </div>
+            <h1 class="animate-title">Pwint.ca</h1>
+            <p class="subtitle">Large Format Printing Specialists</p>
+            <p class="trademark">® Registered Trademark</p>
+            <div class="cta-buttons">
+                <button class="cta-button" onclick="location.href='mailto:info@pwint.ca?subject=Quote%20Request%20-%20Large%20Format%20Printing'">Get a Quote</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="features">
+        <div class="feature-card">
+            <div class="feature-icon">🗺️</div>
+            <h3 style="color: var(--cyan)">Premium Maps</h3>
+            <p>High-quality maps printed on</p>
+            <p class="price-highlight">42" Premium Paper</p>
+            <p>Perfect for office decor or planning</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📸</div>
+            <h3 style="color: var(--magenta)">Photo Posters</h3>
+            <p>Professional photo printing on</p>
+            <p class="price-highlight">24" Photo Paper</p>
+            <p>Available in Gloss or Matte finish</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">✨</div>
+            <h3 style="color: var(--cyan)">Custom Prints</h3>
+            <p>Tailored to your needs</p>
+            <p>Professional quality</p>
+            <p>Fast turnaround time</p>
+        </div>
+    </div>
+
+    <div class="location">
+        <h2>Serving the Ottawa Area</h2>
+        <p>Professional large format printing services in the heart of Ottawa</p>
+        <button class="cta-button" style="margin-top: 20px;" onclick="location.href='mailto:info@pwint.ca?subject=Contact%20Request%20-%20Large%20Format%20Printing'">Contact Us</button>
+    </div>
+
+    <script>
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add hover effect to feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseover', function() {
+                this.style.transform = 'translateY(-10px)';
+            });
+            card.addEventListener('mouseout', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -26,11 +26,13 @@ const GRID_SNAP_SIZE = 20; // Grid snap size in pixels
 const OBJECT_SNAP_THRESHOLD = 10; // Object snap threshold in pixels
 const THUMBNAIL_HEIGHT = 180; // Increased height of thumbnails in the carousel
 const SCALE_FACTORS = [0.25, 0.5, 0.75, 1, 1.5, 2]; // Scale factors for images
+const PADDING_OFFSET = 15; // Negative offset for cell padding to allow bleeding edges
 
 let fabricCanvas; // Fabric.js canvas instance
 let currentPaperHeightInches = 24; // This now controls REAL HEIGHT (based on paper type)
 let currentPrintWidthInches = 36; // This now controls REAL WIDTH (user input in inches)
-let currentMosaicTemplate = null; // Current mosaic template
+let selectedTemplateIdentifier = null; // Holds the string identifier of the selected template (e.g., '2x2')
+let activeTemplateObject = null; // Holds the calculated object for the currently applied template
 let gridLines = []; // Grid lines for visual feedback
 let snapToGrid = false; // Snap to grid flag
 let snapToObjects = true; // Snap to objects flag
@@ -66,6 +68,12 @@ let portraitContainer;
 let landscapeContainer;
 let autoArrangeBtn;
 let clearSelectionBtn;
+let fitToCellBtn;
+let templatePaddingInput;
+let autoFitCheckbox;
+let cellActionsCard;
+let centerInCellBtn;
+let fillCellBtn;
 
 // Initialize DOM elements after the document is loaded
 function initDomElements() {
@@ -91,6 +99,12 @@ function initDomElements() {
     landscapeContainer = document.getElementById('landscape-container');
     autoArrangeBtn = document.getElementById('auto-arrange-btn');
     clearSelectionBtn = document.getElementById('clear-selection-btn');
+    fitToCellBtn = document.getElementById('fit-to-cell-btn');
+    templatePaddingInput = document.getElementById('template-padding');
+    autoFitCheckbox = document.getElementById('auto-fit-on-add');
+    cellActionsCard = document.getElementById('cell-actions-card');
+    centerInCellBtn = document.getElementById('center-in-cell-btn');
+    fillCellBtn = document.getElementById('fill-cell-btn');
 }
 
 /**
@@ -211,6 +225,8 @@ function initializeCanvas() {
     // --- Event Listeners for Fabric Objects ---
     fabricCanvas.on('object:moving', preventObjectOverflow);
     fabricCanvas.on('object:scaling', preventObjectOverflow);
+    fabricCanvas.on('object:scaling', snapObjectSize);
+    fabricCanvas.on('object:scaling', (e) => applyCellClipping(e.target));
     fabricCanvas.on('object:rotating', preventObjectOverflow);
 
     fabricCanvas.on('object:modified', () => {
@@ -228,14 +244,125 @@ function initializeCanvas() {
             fabricCanvas.requestRenderAll();
         }
     });
+
+    fabricCanvas.on('selection:created', handleObjectSelection);
+    fabricCanvas.on('selection:updated', handleObjectSelection);
+    fabricCanvas.on('selection:cleared', handleObjectDeselection);
+
+    fabricCanvas.on('object:modified', (e) => {
+        const obj = e.target;
+        if (!obj || !activeTemplateObject) {
+            // If the object is dropped and there is no active template,
+            // ensure it has no grid data.
+            if (obj && typeof obj.gridRow !== 'undefined') {
+                obj.set({ gridRow: undefined, gridCol: undefined });
+                applyCellClipping(obj); // This will remove the clip path
+                obj.setCoords();
+                fabricCanvas.renderAll();
+            }
+            return;
+        }
+
+        const { cellWidth, cellHeight, cols, rows } = activeTemplateObject;
+        const center = obj.getCenterPoint();
+
+        // Determine the target cell from the drop location
+        const targetCol = Math.floor(center.x / cellWidth);
+        const targetRow = Math.floor(center.y / cellHeight);
+
+        // Check if the drop is outside the grid
+        if (targetCol < 0 || targetCol >= cols || targetRow < 0 || targetRow >= rows) {
+            // Object was dropped outside the grid, so remove its grid properties
+            if (typeof obj.gridRow !== 'undefined') {
+                obj.set({ gridRow: undefined, gridCol: undefined });
+                applyCellClipping(obj); // This will remove the clip path
+                obj.setCoords();
+                fabricCanvas.renderAll();
+            }
+            return;
+        }
+
+        // Find if another object is already in the target cell
+        const targetObject = fabricCanvas.getObjects().find(other => {
+            return other !== obj && other.gridRow === targetRow && other.gridCol === targetCol;
+        });
+
+        if (targetObject) {
+            // If dropping on another object, swap them
+            swapObjects(obj, targetObject);
+        } else {
+            // If dropping on an empty cell or resizing within a cell,
+            // update its position and clipping.
+            const padding = (parseInt(templatePaddingInput.value, 10) || 0) - PADDING_OFFSET;
+            const targetX = targetCol * cellWidth + padding;
+            const targetY = targetRow * cellHeight + padding;
+            const targetWidth = cellWidth - (padding * 2);
+            const targetHeight = cellHeight - (padding * 2);
+
+            // Update grid position data
+            obj.set({
+                gridRow: targetRow,
+                gridCol: targetCol
+            });
+
+            // Re-center the object within the cell.
+            // This is desirable for both dropping and resizing to maintain alignment.
+            obj.set({
+                 left: targetX + (targetWidth - obj.getScaledWidth()) / 2,
+                 top: targetY + (targetHeight - obj.getScaledHeight()) / 2,
+            });
+
+            // ALWAYS apply clipping after determining the cell
+            applyCellClipping(obj);
+            obj.setCoords();
+        }
+        fabricCanvas.renderAll();
+    });
 }
 
 /**
- * Creates a mosaic grid on the canvas based on template
- * @param {string} template - Template identifier (e.g., '2x2', '3x3', 'custom')
+ * Applies a clipping path to an object to constrain it to its cell boundaries.
+ * @param {fabric.Object} obj The fabric object to clip.
  */
-function applyMosaicTemplate(template) {
-    // Clear existing grid lines
+function applyCellClipping(obj) {
+    if (!obj) return;
+
+    // Remove clipping if the object is not in a grid or there's no active template.
+    if (!activeTemplateObject || typeof obj.gridRow === 'undefined') {
+        if (obj.clipPath) {
+            obj.clipPath = null;
+        }
+        return;
+    }
+
+    const padding = (parseInt(templatePaddingInput.value, 10) || 0) - PADDING_OFFSET;
+    const { cellWidth, cellHeight } = activeTemplateObject;
+
+    // Define the clipping area based on the object's grid position.
+    const targetX = obj.gridCol * cellWidth + padding;
+    const targetY = obj.gridRow * cellHeight + padding;
+    const targetWidth = cellWidth - (padding * 2);
+    const targetHeight = cellHeight - (padding * 2);
+
+    // The clipping path is positioned absolutely on the canvas.
+    const clipRect = new fabric.Rect({
+        left: targetX,
+        top: targetY,
+        width: targetWidth,
+        height: targetHeight,
+        absolutePositioned: true // Ensures the clip path is not affected by object's transforms.
+    });
+
+    obj.clipPath = clipRect;
+}
+
+/**
+ * Creates a mosaic grid on the canvas based on a template identifier string.
+ * @param {string} identifier - Template identifier (e.g., '2x2', '3x4', 'custom')
+ */
+function applyMosaicTemplate(identifier) {
+    if (!identifier) return;
+
     clearGridLines();
     
     const canvasWidth = fabricCanvas.getWidth();
@@ -244,31 +371,28 @@ function applyMosaicTemplate(template) {
     let rows = 1;
     let cols = 1;
     
-    // Parse template string or use custom values
-    if (template === 'custom') {
+    if (identifier === 'custom') {
         rows = parseInt(customRowsInput.value, 10) || 2;
         cols = parseInt(customColsInput.value, 10) || 2;
     } else {
-        const parts = template.split('x');
+        const parts = identifier.split('x');
         if (parts.length === 2) {
             rows = parseInt(parts[0], 10);
             cols = parseInt(parts[1], 10);
         }
     }
     
-    // Enforce reasonable limits
     rows = Math.max(1, Math.min(10, rows));
     cols = Math.max(1, Math.min(10, cols));
     
-    // Calculate cell dimensions
     const cellWidth = canvasWidth / cols;
     const cellHeight = canvasHeight / rows;
     
-    // Add grid lines
     createGridLines(rows, cols, canvasWidth, canvasHeight);
     
-    currentMosaicTemplate = {
-        template,
+    // Set the active template object for other functions to use
+    activeTemplateObject = {
+        identifier: identifier,
         rows,
         cols,
         cellWidth,
@@ -276,8 +400,7 @@ function applyMosaicTemplate(template) {
     };
     
     fabricCanvas.renderAll();
-    
-    console.log(`Applied mosaic template: ${template} (${rows}x${cols})`);
+    console.log(`Applied mosaic template: ${identifier} (${rows}x${cols})`);
 }
 
 /**
@@ -345,9 +468,9 @@ function snapObjectToTarget(obj) {
     let didSnap = false;
     
     // Snap to grid if enabled
-    if (snapToGrid && currentMosaicTemplate) {
-        const cellWidth = currentMosaicTemplate.cellWidth;
-        const cellHeight = currentMosaicTemplate.cellHeight;
+    if (snapToGrid && activeTemplateObject) {
+        const cellWidth = activeTemplateObject.cellWidth;
+        const cellHeight = activeTemplateObject.cellHeight;
         
         // Snap left edge to grid
         const snapLeftX = Math.round(objX / cellWidth) * cellWidth;
@@ -443,6 +566,55 @@ function snapObjectToTarget(obj) {
 }
 
 /**
+ * Snap object's size to match adjacent objects during scaling.
+ * @param {object} options - The event options from Fabric.js
+ */
+function snapObjectSize(options) {
+    const obj = options.target;
+    // Return if conditions for snapping aren't met
+    if (!obj || !snapToObjects || !activeTemplateObject || typeof obj.gridRow === 'undefined' || !obj.isScaling) {
+        return;
+    }
+
+    const currentWidth = obj.getScaledWidth();
+    const currentHeight = obj.getScaledHeight();
+
+    // Find neighbors in the same row (left or right)
+    const neighbors = fabricCanvas.getObjects().filter(other =>
+        other !== obj &&
+        other.type !== 'line' &&
+        other.visible &&
+        typeof other.gridRow !== 'undefined' &&
+        other.gridRow === obj.gridRow &&
+        Math.abs(other.gridCol - obj.gridCol) === 1
+    );
+
+    for (const neighbor of neighbors) {
+        const neighborWidth = neighbor.getScaledWidth();
+        const neighborHeight = neighbor.getScaledHeight();
+        let didSnap = false;
+
+        // Snap width if close enough
+        if (Math.abs(currentWidth - neighborWidth) < OBJECT_SNAP_THRESHOLD) {
+            obj.set('scaleX', neighborWidth / obj.width);
+            didSnap = true;
+        }
+
+        // Snap height if close enough
+        if (Math.abs(currentHeight - neighborHeight) < OBJECT_SNAP_THRESHOLD) {
+            obj.set('scaleY', neighborHeight / obj.height);
+            didSnap = true;
+        }
+
+        if (didSnap) {
+            // When snapping, stop checking other neighbors
+            // to prevent weird jumps if it's between two neighbours of different sizes.
+            break;
+        }
+    }
+}
+
+/**
  * Prevents Fabric objects from moving/scaling outside canvas bounds.
  * Operates on the FINAL DISPLAY canvas dimensions.
  */
@@ -491,10 +663,6 @@ function preventObjectOverflow(options) {
         const scaleCorrection = Math.min(scaleXCorrection, scaleYCorrection);
 
         if (scaleCorrection < 1) {
-            // Prevent scaling below a minimum threshold if needed
-            // const minScale = 0.1;
-            // obj.scaleX = Math.max(minScale, obj.scaleX * scaleCorrection);
-            // obj.scaleY = Math.max(minScale, obj.scaleY * scaleCorrection);
             obj.scaleX *= scaleCorrection;
             obj.scaleY *= scaleCorrection;
             needsCorrection = true;
@@ -514,6 +682,342 @@ function preventObjectOverflow(options) {
     if (needsCorrection) {
         obj.setCoords(); // Final coordinate update after corrections
     }
+}
+
+/**
+ * Handles enabling/disabling the 'Fit to Cell' button based on canvas selection.
+ */
+function handleObjectSelection() {
+    const activeObject = fabricCanvas.getActiveObject();
+    if (activeObject && activeTemplateObject) {
+        cellActionsCard.style.display = 'block';
+    } else {
+        handleObjectDeselection();
+    }
+}
+
+function handleObjectDeselection() {
+    cellActionsCard.style.display = 'none';
+}
+
+/**
+ * Fits the currently selected fabric object into the nearest grid cell.
+ */
+function fitSelectedObjectToCell() {
+    const obj = fabricCanvas.getActiveObject();
+    if (!obj || !activeTemplateObject) {
+        console.warn('Fit to cell called without an active object or template.');
+        return;
+    }
+
+    const padding = (parseInt(templatePaddingInput.value, 10) || 0) - PADDING_OFFSET;
+    const { rows, cols, cellWidth, cellHeight } = activeTemplateObject;
+    
+    // Always calculate the current cell based on the object's center
+    const center = obj.getCenterPoint();
+    const targetCol = Math.max(0, Math.min(cols - 1, Math.floor(center.x / cellWidth)));
+    const targetRow = Math.max(0, Math.min(rows - 1, Math.floor(center.y / cellHeight)));
+
+    // Update the object's grid data to its new, correct location
+    obj.set({ gridRow: targetRow, gridCol: targetCol });
+
+    // Calculate target cell dimensions with padding
+    const targetX = targetCol * cellWidth + padding;
+    const targetY = targetRow * cellHeight + padding;
+    const targetWidth = cellWidth - (padding * 2);
+    const targetHeight = cellHeight - (padding * 2);
+
+    // Calculate scale to fit, preserving aspect ratio
+    const imgAspect = obj.width / obj.height;
+    const cellAspect = targetWidth / targetHeight;
+
+    let newScale;
+    if (imgAspect > cellAspect) {
+        // Image is wider than cell, scale to fit width
+        newScale = targetWidth / obj.width;
+    } else {
+        // Image is taller than cell, scale to fit height
+        newScale = targetHeight / obj.height;
+    }
+
+    obj.set({
+        scaleX: newScale,
+        scaleY: newScale,
+    });
+    
+    // Center the object within the cell after scaling and positioning
+    obj.set({
+        left: targetX + (targetWidth - obj.getScaledWidth()) / 2,
+        top: targetY + (targetHeight - obj.getScaledHeight()) / 2
+    });
+
+    applyCellClipping(obj);
+    obj.setCoords();
+    fabricCanvas.renderAll();
+}
+
+/**
+ * Centers the selected object in its grid cell without resizing.
+ */
+function centerInCell() {
+    const obj = fabricCanvas.getActiveObject();
+    if (!obj || !activeTemplateObject) return;
+
+    const padding = (parseInt(templatePaddingInput.value, 10) || 0) - PADDING_OFFSET;
+    const { rows, cols, cellWidth, cellHeight } = activeTemplateObject;
+    
+    // Always calculate the current cell based on the object's center
+    const center = obj.getCenterPoint();
+    const targetCol = Math.max(0, Math.min(cols - 1, Math.floor(center.x / cellWidth)));
+    const targetRow = Math.max(0, Math.min(rows - 1, Math.floor(center.y / cellHeight)));
+
+    // Update the object's grid data
+    obj.set({ gridRow: targetRow, gridCol: targetCol });
+
+    const targetX = obj.gridCol * cellWidth + padding;
+    const targetY = obj.gridRow * cellHeight + padding;
+    const targetWidth = cellWidth - (padding * 2);
+    const targetHeight = cellHeight - (padding * 2);
+
+    obj.set({
+        left: targetX + (targetWidth - obj.getScaledWidth()) / 2,
+        top: targetY + (targetHeight - obj.getScaledHeight()) / 2
+    });
+    
+    applyCellClipping(obj);
+    obj.setCoords();
+    fabricCanvas.renderAll();
+}
+
+/**
+ * Scales the selected object to completely fill its grid cell, cropping it.
+ */
+function fillCell() {
+    const obj = fabricCanvas.getActiveObject();
+    if (!obj || !activeTemplateObject) return;
+
+    const padding = (parseInt(templatePaddingInput.value, 10) || 0) - PADDING_OFFSET;
+    const { rows, cols, cellWidth, cellHeight } = activeTemplateObject;
+
+    // Always calculate the current cell based on the object's center
+    const center = obj.getCenterPoint();
+    const targetCol = Math.max(0, Math.min(cols - 1, Math.floor(center.x / cellWidth)));
+    const targetRow = Math.max(0, Math.min(rows - 1, Math.floor(center.y / cellHeight)));
+    
+    // Update the object's grid data
+    obj.set({ gridRow: targetRow, gridCol: targetCol });
+
+    const targetX = obj.gridCol * cellWidth + padding;
+    const targetY = obj.gridRow * cellHeight + padding;
+    const targetWidth = cellWidth - (padding * 2);
+    const targetHeight = cellHeight - (padding * 2);
+
+    // Calculate scale to cover the cell
+    const scale = Math.max(targetWidth / obj.width, targetHeight / obj.height);
+    
+    obj.set({
+        scaleX: scale,
+        scaleY: scale
+    });
+    
+    // Center the now larger image within the cell area
+    obj.set({
+        left: targetX + (targetWidth - obj.getScaledWidth()) / 2,
+        top: targetY + (targetHeight - obj.getScaledHeight()) / 2
+    });
+
+    applyCellClipping(obj);
+    obj.setCoords();
+    fabricCanvas.renderAll();
+}
+
+/**
+ * Swaps two objects on the canvas based on their grid positions.
+ * @param {fabric.Object} obj1 - The object being dragged.
+ * @param {fabric.Object} obj2 - The object being swapped with.
+ */
+function swapObjects(obj1, obj2) {
+    const padding = (parseInt(templatePaddingInput.value, 10) || 0) - PADDING_OFFSET;
+    const { cellWidth, cellHeight } = activeTemplateObject;
+
+    // Calculate the target positions with padding for both objects
+    const obj1TargetX = obj2.gridCol * cellWidth + padding;
+    const obj1TargetY = obj2.gridRow * cellHeight + padding;
+    const obj2TargetX = obj1.gridCol * cellWidth + padding;
+    const obj2TargetY = obj1.gridRow * cellHeight + padding;
+    
+    // Animate obj1 moving to obj2's cell
+    fabric.util.animate({
+        startValue: { left: obj1.left, top: obj1.top },
+        endValue: { 
+            left: obj1TargetX + (cellWidth - (padding*2) - obj1.getScaledWidth()) / 2, 
+            top: obj1TargetY + (cellHeight - (padding*2) - obj1.getScaledHeight()) / 2 
+        },
+        duration: 250,
+        onChange: (values) => {
+            obj1.set({ left: values.left, top: values.top }).setCoords();
+            fabricCanvas.renderAll();
+        },
+    });
+
+    // Animate obj2 moving to obj1's original cell
+    fabric.util.animate({
+        startValue: { left: obj2.left, top: obj2.top },
+        endValue: { 
+            left: obj2TargetX + (cellWidth - (padding*2) - obj2.getScaledWidth()) / 2,
+            top: obj2TargetY + (cellHeight - (padding*2) - obj2.getScaledHeight()) / 2
+        },
+        duration: 250,
+        onChange: (values) => {
+            obj2.set({ left: values.left, top: values.top }).setCoords();
+            fabricCanvas.renderAll();
+        },
+        onComplete: () => {
+            // Swap the grid metadata after the animation is complete
+            const tempGridRow = obj1.gridRow;
+            const tempGridCol = obj1.gridCol;
+            obj1.set({ gridRow: obj2.gridRow, gridCol: obj2.gridCol }).setCoords();
+            obj2.set({ gridRow: tempGridRow, gridCol: tempGridCol }).setCoords();
+            
+            // Re-apply clipping to both objects in their new positions
+            applyCellClipping(obj1);
+            applyCellClipping(obj2);
+
+            fabricCanvas.renderAll();
+        }
+    });
+}
+
+/**
+ * Auto-arranges selected images on the canvas based on the current template.
+ * @param {boolean} reapply - If true, it will re-apply the current layout with new padding.
+ */
+async function autoArrangeImages(reapply = false) {
+    if (!activeTemplateObject) {
+        showFileError('Please apply a template first.');
+        return;
+    }
+    
+    const objectsToArrange = reapply ? 
+        fabricCanvas.getObjects().filter(o => typeof o.gridRow !== 'undefined') : 
+        selectedImages;
+
+    if (objectsToArrange.length === 0 && !reapply) {
+        showFileError('Please select images from the library to arrange.');
+        return;
+    }
+
+    const { rows, cols, cellWidth, cellHeight } = activeTemplateObject;
+    const totalCells = rows * cols;
+    const padding = (parseInt(templatePaddingInput.value, 10) || 0) - PADDING_OFFSET;
+
+    if (objectsToArrange.length > totalCells && !reapply) {
+        showFileError(`Too many images selected (${objectsToArrange.length}). The template only has ${totalCells} cells.`);
+        return;
+    }
+    
+    // Clear canvas before adding new images, but not when reapplying layout
+    if (!reapply) {
+        fabricCanvas.clear();
+        fabricCanvas.backgroundColor = '#ffffff';
+        applyMosaicTemplate(activeTemplateObject.identifier);
+    }
+    
+    let imagePromises;
+
+    if (reapply) {
+        // Rearrange existing objects
+        imagePromises = objectsToArrange.map(obj => {
+            return new Promise(resolve => {
+                const targetX = obj.gridCol * cellWidth + padding;
+                const targetY = obj.gridRow * cellHeight + padding;
+                const targetWidth = cellWidth - padding * 2;
+                const targetHeight = cellHeight - padding * 2;
+
+                const scale = Math.min(targetWidth / obj.width, targetHeight / obj.height);
+                
+                obj.set({
+                    scaleX: scale,
+                    scaleY: scale,
+                    left: targetX + (targetWidth - obj.getScaledWidth()) / 2,
+                    top: targetY + (targetHeight - obj.getScaledHeight()) / 2
+                });
+                
+                obj.setCoords();
+                resolve(obj);
+            });
+        });
+
+    } else {
+        // Place new images
+        const selectedImagesData = [];
+         ['portrait', 'landscape'].forEach(type => {
+            stagedImages[type].forEach(img => {
+                if (img.selected) {
+                    selectedImagesData.push(img);
+                }
+            });
+        });
+        
+        imagePromises = selectedImagesData.map((imageData, i) => {
+            const row = Math.floor(i / cols);
+            const col = Math.floor(i % cols);
+            return placeImageInCell(imageData, row, col, 1, 1, cellWidth, cellHeight, padding);
+        });
+    }
+
+    const placedObjects = await Promise.all(imagePromises);
+    placedObjects.forEach(applyCellClipping); // Apply clipping to all newly placed objects
+
+    fabricCanvas.renderAll();
+    console.log(`Arranged ${objectsToArrange.length} items into a ${rows}x${cols} grid.`);
+}
+
+/**
+ * Tries to place an image with specific span
+ * @returns {Promise<fabric.Image>} A promise that resolves with the created Fabric image object.
+ */
+function placeImageInCell(imageData, row, col, spanRows, spanCols, cellWidth, cellHeight, gap = 0) {
+    return new Promise((resolve) => {
+        const left = col * cellWidth + gap;
+        const top = row * cellHeight + gap;
+        const width = spanCols * cellWidth - (gap * 2);
+        const height = spanRows * cellHeight - (gap * 2);
+
+        fabric.Image.fromURL(imageData.src, function(img) {
+            const imgAspect = img.width / img.height;
+            const cellAspect = width / height;
+            
+            let scale;
+            if (imgAspect > cellAspect) {
+                scale = width / img.width; // Fit to width
+            } else {
+                scale = height / img.height; // Fit to height
+            }
+
+            img.set({
+                left: left,
+                top: top,
+                scaleX: scale,
+                scaleY: scale,
+                originX: 'left',
+                originY: 'top',
+                borderColor: '#e91e63',
+                cornerColor: '#e91e63',
+                cornerStyle: 'circle',
+                transparentCorners: false,
+                gridRow: row, // Custom property for swapping
+                gridCol: col  // Custom property for swapping
+            });
+            
+            const centeredLeft = left + (width - img.getScaledWidth()) / 2;
+            const centeredTop = top + (height - img.getScaledHeight()) / 2;
+            img.set({ left: centeredLeft, top: centeredTop });
+
+            fabricCanvas.add(img);
+            resolve(img);
+        }, { crossOrigin: 'anonymous' });
+    });
 }
 
 /**
@@ -563,11 +1067,8 @@ function stageImage(file) {
             // Add to appropriate array
             stagedImages[orientation].push(stagedImage);
             
-            // Create and add thumbnail
-            addThumbnail(stagedImage);
-            
-            // Update carousel display
-            updateCarousels();
+            // Rerender the library to show the new image
+            renderImageLibrary();
         };
         
         imgElement.onerror = function() {
@@ -587,280 +1088,191 @@ function stageImage(file) {
 }
 
 /**
- * Creates and adds a thumbnail to the appropriate carousel
- * @param {Object} imageData - The staged image data
+ * Creates and adds a thumbnail to the appropriate carousel group.
+ * This function is now designed to be called by renderImageLibrary.
+ * @param {Object} imageData - The staged image data.
+ * @param {HTMLElement} groupContainer - The container for the scale group.
  */
-function addThumbnail(imageData) {
-    // Initialize scale factor if not present
-    if (imageData.scaleFactor === undefined) {
-        imageData.scaleFactor = 1; // Default scale factor
-    }
-    
-    // Clear placeholder if present
-    const container = imageData.orientation === 'portrait' ? portraitContainer : landscapeContainer;
-    if (container.querySelector('.text-gray-400')) {
-        container.innerHTML = '';
-    }
-    
+function addThumbnail(imageData, groupContainer) {
     // Create thumbnail container
     const thumbnail = document.createElement('div');
-    thumbnail.className = 'relative group flex-shrink-0 mb-14'; // Increased bottom margin for two rows of buttons
+    thumbnail.className = 'relative group flex-shrink-0';
     thumbnail.setAttribute('data-id', imageData.id);
     
-    // Calculate thumbnail dimensions - fixed height but maintain aspect ratio
+    // Calculate thumbnail dimensions
     const aspect = imageData.width / imageData.height;
-    const thumbHeight = THUMBNAIL_HEIGHT;
+    const thumbHeight = THUMBNAIL_HEIGHT; // 180px
     const thumbWidth = Math.round(thumbHeight * aspect);
     
-    // Create thumbnail image
     const img = document.createElement('img');
     img.src = imageData.src;
-    img.className = 'rounded cursor-pointer transition transform hover:scale-105 border-2';
+    img.className = 'rounded-lg cursor-pointer transition-all duration-200 border-4';
     img.style.height = `${thumbHeight}px`;
-    img.style.width = `${thumbWidth}px`; 
+    img.style.width = `${thumbWidth}px`;
     img.style.objectFit = 'cover';
     img.alt = imageData.file.name;
-    img.title = imageData.file.name;
+    img.title = `Name: ${imageData.file.name}\nDimensions: ${imageData.width}x${imageData.height}`;
     
-    // Default border
-    img.style.borderColor = 'transparent';
-    
-    // Create control overlay
-    const controls = document.createElement('div');
-    controls.className = 'absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-1 opacity-0 group-hover:opacity-100 transition flex justify-center space-x-2';
-    
-    // Add to Canvas button
+    // Set border based on selection
+    img.style.borderColor = imageData.selected ? '#e91e63' : 'transparent';
+
+    // Main controls overlay (Add, Rotate, Delete)
+    const mainControls = document.createElement('div');
+    mainControls.className = 'absolute top-0 right-0 p-1 opacity-0 group-hover:opacity-100 transition flex flex-col space-y-1';
+
     const addToCanvasBtn = document.createElement('button');
-    addToCanvasBtn.className = 'text-white p-1 rounded hover:bg-green-700';
-    addToCanvasBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>';
+    addToCanvasBtn.className = 'text-white bg-black bg-opacity-40 p-1 rounded-full hover:bg-green-600';
+    addToCanvasBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>';
     addToCanvasBtn.title = 'Add to canvas';
-    
-    // Rotate button
+
     const rotateBtn = document.createElement('button');
-    rotateBtn.className = 'text-white p-1 rounded hover:bg-gray-700';
-    rotateBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
+    rotateBtn.className = 'text-white bg-black bg-opacity-40 p-1 rounded-full hover:bg-gray-600';
+    rotateBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
     rotateBtn.title = 'Rotate image';
-    
-    // Delete button
+
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'text-white p-1 rounded hover:bg-red-700';
-    deleteBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>';
-    deleteBtn.title = 'Remove image';
+    deleteBtn.className = 'text-white bg-black bg-opacity-40 p-1 rounded-full hover:bg-red-600';
+    deleteBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>';
+    deleteBtn.title = 'Remove from library';
+
+    mainControls.appendChild(addToCanvasBtn);
+    mainControls.appendChild(rotateBtn);
+    mainControls.appendChild(deleteBtn);
     
-    // Create scale buttons container (now with flex column for two rows)
-    const scaleContainer = document.createElement('div');
-    scaleContainer.className = 'absolute -bottom-14 left-0 right-0 bg-gray-800 bg-opacity-75 p-1 flex flex-col justify-center gap-1 text-xs rounded-b overflow-hidden';
+    // Scale controls overlay
+    const scaleControls = document.createElement('div');
+    scaleControls.className = 'thumbnail-controls p-2 flex flex-col justify-center gap-1 text-xs';
+
+    const scaleFactors = [
+        [0.25, 0.5, 0.75],
+        [1, 1.5, 2]
+    ];
     
-    // Split scale factors into two rows
-    const firstRowFactors = SCALE_FACTORS.slice(0, 3); // 0.25, 0.5, 0.75
-    const secondRowFactors = SCALE_FACTORS.slice(3);   // 1, 2, 3
-    
-    // Create first row of scale buttons
-    const firstRow = document.createElement('div');
-    firstRow.className = 'flex justify-center gap-1';
-    
-    firstRowFactors.forEach(factor => {
-        const scaleBtn = document.createElement('button');
-        scaleBtn.innerText = factor + 'x';
-        
-        // Highlight the active scale factor
-        if (factor === imageData.scaleFactor) {
-            scaleBtn.className = 'px-2 py-1 bg-blue-600 text-white rounded-sm flex-1';
-        } else {
-            scaleBtn.className = 'px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded-sm flex-1';
-        }
-        
-        scaleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            updateImageScale(imageData.id, factor);
+    scaleFactors.forEach(rowFactors => {
+        const row = document.createElement('div');
+        row.className = 'flex justify-center gap-1';
+        rowFactors.forEach(factor => {
+            const scaleBtn = document.createElement('button');
+            scaleBtn.innerText = factor + 'x';
+            const isActive = factor === (imageData.scaleFactor || 1);
+            scaleBtn.className = `px-2 py-0.5 rounded-sm flex-1 transition ${isActive ? 'bg-blue-600 text-white' : 'bg-gray-700 bg-opacity-70 hover:bg-gray-500 text-white'}`;
+            scaleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                updateImageScale(imageData.id, factor);
+            });
+            row.appendChild(scaleBtn);
         });
-        
-        firstRow.appendChild(scaleBtn);
+        scaleControls.appendChild(row);
     });
-    
-    // Create second row of scale buttons
-    const secondRow = document.createElement('div');
-    secondRow.className = 'flex justify-center gap-1';
-    
-    secondRowFactors.forEach(factor => {
-        const scaleBtn = document.createElement('button');
-        scaleBtn.innerText = factor + 'x';
-        
-        // Highlight the active scale factor
-        if (factor === imageData.scaleFactor) {
-            scaleBtn.className = 'px-2 py-1 bg-blue-600 text-white rounded-sm flex-1';
-        } else {
-            scaleBtn.className = 'px-2 py-1 bg-gray-600 hover:bg-gray-500 text-white rounded-sm flex-1';
-        }
-        
-        scaleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            updateImageScale(imageData.id, factor);
-        });
-        
-        secondRow.appendChild(scaleBtn);
-    });
-    
-    // Add both rows to the scale container
-    scaleContainer.appendChild(firstRow);
-    scaleContainer.appendChild(secondRow);
-    
+
     // Add event listeners
-    img.addEventListener('click', function() {
-        toggleImageSelection(imageData.id);
-    });
+    img.addEventListener('click', () => toggleImageSelection(imageData.id));
+    addToCanvasBtn.addEventListener('click', (e) => { e.stopPropagation(); addSingleImageToCanvas(imageData); });
+    rotateBtn.addEventListener('click', (e) => { e.stopPropagation(); rotateImage(imageData.id); });
+    deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); removeImage(imageData.id); });
     
-    addToCanvasBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        addSingleImageToCanvas(imageData);
-    });
-    
-    rotateBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        rotateImage(imageData.id);
-    });
-    
-    deleteBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        removeImage(imageData.id);
-    });
-    
-    // Assemble components
-    controls.appendChild(addToCanvasBtn);
-    controls.appendChild(rotateBtn);
-    controls.appendChild(deleteBtn);
     thumbnail.appendChild(img);
-    thumbnail.appendChild(controls);
-    thumbnail.appendChild(scaleContainer);
-    container.appendChild(thumbnail);
+    thumbnail.appendChild(mainControls);
+    thumbnail.appendChild(scaleControls);
+    groupContainer.appendChild(thumbnail);
 }
 
 /**
- * Updates the scale factor for an image
- * @param {string} id - The image ID
- * @param {number} scaleFactor - The new scale factor
+ * Updates the scale factor for an image and re-renders the library.
+ * @param {string} id - The image ID.
+ * @param {number} newScale - The new scale factor.
  */
-function updateImageScale(id, scaleFactor) {
-    let found = false;
-    let updatedType = ''; // Track which type (portrait/landscape) the image belongs to
-    
+function updateImageScale(id, newScale) {
+    let imageToUpdate = null;
     ['portrait', 'landscape'].forEach(type => {
-        const imageIndex = stagedImages[type].findIndex(img => img.id === id);
-        if (imageIndex >= 0) {
-            found = true;
-            updatedType = type;
-            const currentImage = stagedImages[type][imageIndex];
-            
-            // Remove from current position
-            stagedImages[type].splice(imageIndex, 1);
-            
-            // Update scale factor
-            currentImage.scaleFactor = scaleFactor;
-            
-            // We'll sort stagedImages by scale factor to group images
-            // Find the right position to insert based on scale
-            let insertIndex = stagedImages[type].findIndex(img => img.scaleFactor > scaleFactor);
-            if (insertIndex === -1) insertIndex = stagedImages[type].length;
-            
-            // Insert at the correct position to maintain scale order
-            stagedImages[type].splice(insertIndex, 0, currentImage);
-            
-            // Remove the thumbnail - we'll rebuild the entire container to show proper grouping
-            const thumbnail = document.querySelector(`[data-id="${id}"]`);
-            if (thumbnail) {
-                thumbnail.remove();
-            }
+        const img = stagedImages[type].find(i => i.id === id);
+        if (img) {
+            imageToUpdate = img;
         }
     });
-    
-    if (found) {
-        // Rebuild the entire carousel for the updated type to show proper grouping
-        rebuildCarousel(updatedType);
+
+    if (imageToUpdate) {
+        imageToUpdate.scaleFactor = newScale;
+        console.log(`Updated scale for image ${id} to ${newScale}x`);
+        renderImageLibrary(); // Re-render the entire library to regroup
         
-        // Find the new thumbnail and scroll it into view
+        // Highlight the updated thumbnail
         setTimeout(() => {
             const newThumbnail = document.querySelector(`[data-id="${id}"]`);
             if (newThumbnail) {
                 newThumbnail.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                
-                // Add a brief highlight effect
-                newThumbnail.classList.add('scale-highlight');
-                setTimeout(() => {
-                    newThumbnail.classList.remove('scale-highlight');
-                }, 1000);
+                const imgElement = newThumbnail.querySelector('img');
+                if (imgElement) {
+                    imgElement.classList.add('ring-4', 'ring-blue-500', 'transition-all', 'duration-500');
+                    setTimeout(() => {
+                        imgElement.classList.remove('ring-4', 'ring-blue-500');
+                    }, 1000);
+                }
             }
         }, 100);
-        
-        console.log(`Updated scale factor for image ${id} to ${scaleFactor}x`);
     }
 }
 
 /**
- * Rebuilds the entire carousel for a specific type (portrait/landscape)
- * to properly group images by scale factor
- * @param {string} type - The image type ('portrait' or 'landscape')
+ * Renders the entire image library, grouping images by orientation and scale.
  */
-function rebuildCarousel(type) {
+function renderImageLibrary() {
+    renderOrientationSection('portrait');
+    renderOrientationSection('landscape');
+    updateSelectionVisuals(); // Ensure selection visuals are correct after re-render
+}
+
+/**
+ * Renders a specific orientation section (portrait or landscape)
+ * @param {string} type - 'portrait' or 'landscape'
+ */
+function renderOrientationSection(type) {
     const container = type === 'portrait' ? portraitContainer : landscapeContainer;
-    
-    // Clear the container
-    container.innerHTML = '';
-    
-    // If no images, show placeholder
-    if (stagedImages[type].length === 0) {
-        container.innerHTML = `<div class="text-center text-gray-400 italic py-8 px-12 border border-gray-200 rounded-md">No ${type} images yet</div>`;
+    container.innerHTML = ''; // Clear existing content
+
+    const images = stagedImages[type];
+    if (images.length === 0) {
+        container.innerHTML = `<div class="text-center w-full text-gray-400 italic py-16">No ${type} images yet</div>`;
         return;
     }
-    
+
     // Group images by scale factor
-    const groupedByScale = {};
-    SCALE_FACTORS.forEach(scale => {
-        groupedByScale[scale] = stagedImages[type].filter(img => img.scaleFactor === scale);
-    });
+    const grouped = images.reduce((acc, img) => {
+        const scale = img.scaleFactor || 1;
+        if (!acc[scale]) {
+            acc[scale] = [];
+        }
+        acc[scale].push(img);
+        return acc;
+    }, {});
+
+    // Sort scales and render each group
+    const sortedScales = Object.keys(grouped).sort((a, b) => parseFloat(a) - parseFloat(b));
     
-    // Add each group with dividers
-    let isFirst = true;
-    SCALE_FACTORS.forEach(scale => {
-        const imagesWithScale = groupedByScale[scale];
-        if (imagesWithScale.length === 0) return;
+    sortedScales.forEach(scale => {
+        const group = grouped[scale];
         
-        // Add divider before each group (except the first)
-        if (!isFirst) {
-            const divider = document.createElement('div');
-            divider.className = 'scale-divider h-full w-1 bg-gradient-to-b from-pwint-magenta to-pwint-cyan mx-2 rounded-full';
-            container.appendChild(divider);
-        } else {
-            isFirst = false;
-        }
+        // Create main container for this scale group
+        const scaleGroupContainer = document.createElement('div');
+        scaleGroupContainer.className = 'scale-group';
         
-        // Add scale label with image count
-        const scaleLabel = document.createElement('div');
-        scaleLabel.className = 'scale-label bg-gray-800 text-white text-xs py-1 px-3 rounded-full self-center flex items-center';
-        
-        // Create scale icon
-        const scaleIcon = document.createElement('span');
-        if (scale < 1) {
-            scaleIcon.innerHTML = '🔍'; // Magnifying glass for small scales
-        } else if (scale === 1) {
-            scaleIcon.innerHTML = '✓'; // Checkmark for normal scale
-        } else {
-            scaleIcon.innerHTML = '🔎'; // Magnifying glass with plus for large scales
-        }
-        scaleIcon.className = 'mr-1';
-        
-        scaleLabel.appendChild(scaleIcon);
-        
-        // Add text with count
-        const scaleLabelText = document.createElement('span');
-        scaleLabelText.innerText = `${scale}× (${imagesWithScale.length})`;
-        scaleLabel.appendChild(scaleLabelText);
-        
-        container.appendChild(scaleLabel);
-        
-        // Add all images in this scale group
-        imagesWithScale.forEach(imageData => {
-            addThumbnail(imageData);
+        // Create and add the header (e.g., "✅ 1x (9)")
+        const header = document.createElement('div');
+        header.className = 'scale-group-header';
+        header.innerHTML = `✓ ${scale}x (${group.length})`;
+        scaleGroupContainer.appendChild(header);
+
+        // Create a container for the images within this group
+        const imagesContainer = document.createElement('div');
+        imagesContainer.className = 'scale-group-images';
+
+        // Add each image thumbnail to this group
+        group.forEach(imageData => {
+            addThumbnail(imageData, imagesContainer);
         });
+
+        scaleGroupContainer.appendChild(imagesContainer);
+        container.appendChild(scaleGroupContainer);
     });
 }
 
@@ -878,22 +1290,20 @@ function addSingleImageToCanvas(imageData) {
         const targetWidth = canvasWidth / 3;
         const targetHeight = canvasHeight / 3;
         
-        const imgAspect = imageData.width / imageData.height;
+        const imgAspect = img.width / img.height;
+        const targetAspect = targetWidth / targetHeight;
         
-        let scaleX, scaleY;
-        
-        if (imgAspect > 1) { // Landscape orientation
-            scaleX = targetWidth / imageData.width;
-            scaleY = scaleX;
-        } else { // Portrait orientation
-            scaleY = targetHeight / imageData.height;
-            scaleX = scaleY;
+        let scale;
+        if (imgAspect > targetAspect) {
+             scale = targetWidth / img.width; // Image is wider, fit to width
+        } else {
+             scale = targetHeight / img.height; // Image is taller, fit to height
         }
         
         // Apply user-selected scale factor
         const userScaleFactor = imageData.scaleFactor || 1;
-        scaleX *= userScaleFactor;
-        scaleY *= userScaleFactor;
+        const scaleX = scale * userScaleFactor;
+        const scaleY = scale * userScaleFactor;
         
         // Position at center of canvas or in a vacant area
         img.set({
@@ -923,12 +1333,7 @@ function addSingleImageToCanvas(imageData) {
  * Updates the carousels display
  */
 function updateCarousels() {
-    // Rebuild both carousels with proper grouping
-    rebuildCarousel('portrait');
-    rebuildCarousel('landscape');
-    
-    // Update selection visuals
-    updateSelectionVisuals();
+    renderImageLibrary();
 }
 
 /**
@@ -972,13 +1377,8 @@ function updateSelectionVisuals() {
     document.querySelectorAll('[data-id]').forEach(thumb => {
         const id = thumb.getAttribute('data-id');
         const img = thumb.querySelector('img');
-        
-        if (selectedImages.includes(id)) {
-            img.style.borderColor = '#e91e63'; // Pwint magenta
-            img.classList.add('ring-2', 'ring-pink-600');
-        } else {
-            img.style.borderColor = 'transparent';
-            img.classList.remove('ring-2', 'ring-pink-600');
+        if (img) {
+            img.style.borderColor = selectedImages.includes(id) ? '#e91e63' : 'transparent';
         }
     });
 }
@@ -1009,15 +1409,8 @@ function rotateImage(id) {
             // Remove from the old array
             stagedImages[type].splice(imageIndex, 1);
             
-            // Remove thumbnail
-            const thumbnail = document.querySelector(`[data-id="${id}"]`);
-            if (thumbnail) {
-                thumbnail.remove();
-            }
-            
-            // Rebuild both carousels
-            rebuildCarousel(type);
-            rebuildCarousel(newOrientation);
+            // Rerender the entire library
+            renderImageLibrary();
             
             // Find the new thumbnail and scroll it into view
             setTimeout(() => {
@@ -1045,13 +1438,11 @@ function rotateImage(id) {
  */
 function removeImage(id) {
     let found = false;
-    let removedType = '';
     
     ['portrait', 'landscape'].forEach(type => {
         const imageIndex = stagedImages[type].findIndex(img => img.id === id);
         if (imageIndex >= 0) {
             found = true;
-            removedType = type;
             
             // Remove from array
             stagedImages[type].splice(imageIndex, 1);
@@ -1065,9 +1456,8 @@ function removeImage(id) {
     });
     
     if (found) {
-        // Rebuild the carousel for the type that had an image removed
-        rebuildCarousel(removedType);
-        updateSelectionVisuals();
+        // Rebuild the library
+        renderImageLibrary();
         console.log(`Removed image ${id}`);
     }
 }
@@ -1141,259 +1531,15 @@ function unselectAllImages(type) {
 }
 
 /**
- * Auto-arranges selected images on the canvas
- */
-function autoArrangeImages() {
-    if (selectedImages.length === 0) {
-        showFileError('Please select images to arrange');
-        return;
-    }
-    
-    // Reset the canvas first
-    fabricCanvas.clear();
-    fabricCanvas.backgroundColor = '#ffffff';
-    clearGridLines();
-    
-    // Collect selected images data
-    const selectedImagesData = [];
-    
-    ['portrait', 'landscape'].forEach(type => {
-        stagedImages[type].forEach(img => {
-            if (img.selected) {
-                selectedImagesData.push(img);
-            }
-        });
-    });
-    
-    // Get canvas dimensions
-    const canvasWidth = fabricCanvas.getWidth();
-    const canvasHeight = fabricCanvas.getHeight();
-    
-    // Count different image types
-    const totalImages = selectedImagesData.length;
-    const numLandscape = selectedImagesData.filter(img => img.orientation === 'landscape').length;
-    const numPortrait = selectedImagesData.filter(img => img.orientation === 'portrait').length;
-    
-    // Calculate optimal grid size based on number of images
-    // Use fewer grid cells for better image sizes
-    let gridCols, gridRows;
-    
-    if (totalImages <= 2) {
-        // For 1-2 images, use 1 row
-        gridCols = totalImages;
-        gridRows = 1;
-    } else if (totalImages <= 4) {
-        // For 3-4 images, use 2x2 grid
-        gridCols = 2;
-        gridRows = 2;
-    } else if (totalImages <= 6) {
-        // For 5-6 images, use 3x2 grid
-        gridCols = 3;
-        gridRows = 2;
-    } else if (totalImages <= 9) {
-        // For 7-9 images, use 3x3 grid
-        gridCols = 3;
-        gridRows = 3;
-    } else if (totalImages <= 12) {
-        // For 10-12 images, use 4x3 grid
-        gridCols = 4;
-        gridRows = 3;
-    } else {
-        // For many images, calculate a reasonable grid size
-        gridCols = Math.ceil(Math.sqrt(totalImages));
-        gridRows = Math.ceil(totalImages / gridCols);
-    }
-    
-    // Adjust for portrait-heavy or landscape-heavy collections
-    if (numPortrait > numLandscape * 2 && gridRows < gridCols) {
-        // Switch rows and columns for portrait-heavy collections
-        [gridRows, gridCols] = [gridCols, gridRows];
-    } else if (numLandscape > numPortrait * 2 && gridCols < gridRows) {
-        // Ensure more columns for landscape-heavy collections
-        [gridRows, gridCols] = [gridCols, gridRows];
-    }
-    
-    // Ensure minimum grid size
-    gridRows = Math.max(1, gridRows);
-    gridCols = Math.max(1, gridCols);
-    
-    console.log(`Grid: ${gridCols}x${gridRows} for ${totalImages} images (L:${numLandscape}, P:${numPortrait})`);
-    
-    // Create a placement matrix to track used cells
-    const grid = Array(gridRows).fill().map(() => Array(gridCols).fill(null));
-    
-    // Cell dimensions
-    const cellWidth = canvasWidth / gridCols;
-    const cellHeight = canvasHeight / gridRows;
-    
-    // Sort images by size (larger first)
-    selectedImagesData.sort((a, b) => {
-        const aSize = a.width * a.height;
-        const bSize = b.width * b.height;
-        return bSize - aSize;
-    });
-    
-    // Place images with proper gaps for snapping
-    let unplacedImages = [];
-    const SNAP_GAP = 0; // No gap between images as requested
-    
-    // First pass - place large images with optimal cell span
-    selectedImagesData.forEach(imageData => {
-        // Determine optimal span based on orientation
-        let spanRows, spanCols;
-        
-        if (imageData.orientation === 'landscape') {
-            spanRows = 1;
-            spanCols = 2;
-        } else { // portrait
-            spanRows = 2;
-            spanCols = 1;
-        }
-        
-        // Ensure span fits in grid
-        spanRows = Math.min(spanRows, gridRows);
-        spanCols = Math.min(spanCols, gridCols);
-        
-        // Try to place with optimal span
-        let placed = tryPlaceWithSpan(imageData, grid, cellWidth, cellHeight, gridRows, gridCols, 
-                                  spanRows, spanCols, SNAP_GAP);
-        
-        // If can't place with optimal span, try with smaller spans
-        if (!placed && (spanRows > 1 || spanCols > 1)) {
-            // Try with single cell
-            placed = tryPlaceWithSpan(imageData, grid, cellWidth, cellHeight, gridRows, gridCols, 
-                                  1, 1, SNAP_GAP);
-        }
-        
-        if (!placed) {
-            unplacedImages.push(imageData);
-        }
-    });
-    
-    // Second pass - force placement for unplaced images
-    if (unplacedImages.length > 0) {
-        console.log(`Placing ${unplacedImages.length} remaining images...`);
-        
-        unplacedImages.forEach(imageData => {
-            // Find any available single cell
-            for (let r = 0; r < gridRows; r++) {
-                for (let c = 0; c < gridCols; c++) {
-                    if (grid[r][c] === null) {
-                        // Place with single cell
-                        grid[r][c] = imageData.id;
-                        placeImageInCell(imageData, r, c, 1, 1, cellWidth, cellHeight, SNAP_GAP);
-                        return;
-                    }
-                }
-            }
-            
-            // If no empty cell, place in first cell (overlap)
-            if (grid.length > 0 && grid[0].length > 0) {
-                placeImageInCell(imageData, 0, 0, 1, 1, cellWidth, cellHeight, SNAP_GAP);
-            }
-        });
-    }
-    
-    fabricCanvas.renderAll();
-}
-
-/**
- * Tries to place an image with specific span
- */
-function tryPlaceWithSpan(imageData, grid, cellWidth, cellHeight, gridRows, gridCols, spanRows, spanCols, gap = 0) {
-    // Find available grid position
-    for (let r = 0; r <= gridRows - spanRows; r++) {
-        for (let c = 0; c <= gridCols - spanCols; c++) {
-            let canPlace = true;
-            
-            // Check if all required cells are empty
-            for (let sr = 0; sr < spanRows; sr++) {
-                for (let sc = 0; sc < spanCols; sc++) {
-                    if (grid[r + sr][c + sc] !== null) {
-                        canPlace = false;
-                        break;
-                    }
-                }
-                if (!canPlace) break;
-            }
-            
-            if (canPlace) {
-                // Mark cells as used
-                for (let sr = 0; sr < spanRows; sr++) {
-                    for (let sc = 0; sc < spanCols; sc++) {
-                        grid[r + sr][c + sc] = imageData.id;
-                    }
-                }
-                
-                // Place the image
-                placeImageInCell(imageData, r, c, spanRows, spanCols, cellWidth, cellHeight, gap);
-                return true;
-            }
-        }
-    }
-    
-    return false;
-}
-
-/**
- * Places an image in a specific grid cell on the canvas
- */
-function placeImageInCell(imageData, row, col, spanRows, spanCols, cellWidth, cellHeight, gap = 0, scaleFactor = 1.0) {
-    // Calculate position and dimensions
-    const left = col * cellWidth + gap;
-    const top = row * cellHeight + gap;
-    const width = spanCols * cellWidth - (gap * 2);
-    const height = spanRows * cellHeight - (gap * 2);
-    
-    // Load the image onto the canvas
-    fabric.Image.fromURL(imageData.src, function(img) {
-        // Calculate scale to fit the cell, preserving aspect ratio
-        const imgAspect = imageData.width / imageData.height;
-        const cellAspect = width / height;
-        
-        let scaleX, scaleY;
-        
-        if (imgAspect > cellAspect) {
-            // Image is wider than cell proportion, scale to fit width
-            scaleX = width / imageData.width;
-            scaleY = scaleX;
-        } else {
-            // Image is taller than cell proportion, scale to fit height
-            scaleY = height / imageData.height;
-            scaleX = scaleY;
-        }
-        
-        // Apply scaling and position - use scaleFactor close to 1 for tighter fit
-        img.set({
-            left: left + width/2,
-            top: top + height/2,
-            originX: 'center',
-            originY: 'center',
-            scaleX: scaleX * scaleFactor,
-            scaleY: scaleY * scaleFactor,
-            borderColor: '#e91e63', // Pwint magenta
-            cornerColor: '#e91e63', // Pwint magenta
-            cornerSize: Math.max(8, Math.min(14, cellWidth / 10)),
-            cornerStyle: 'circle',
-            transparentCorners: false,
-            padding: 0,
-            strokeWidth: 0,
-            cornerStrokeColor: '#ffffff'
-        });
-        
-        fabricCanvas.add(img);
-    }, { crossOrigin: 'anonymous' });
-}
-
-/**
  * Handles file drop event for the staging area
  */
 function handleStagingFileDrop(e) {
     e.preventDefault();
     e.stopPropagation();
-    dropZone.classList.remove('bg-gray-200');
-    dropZone.classList.add('bg-gray-100');
-    fileErrorMsg.style.display = 'none';
+    dropZone.classList.remove('bg-base-300');
+    if (fileErrorMsg) {
+        fileErrorMsg.style.display = 'none';
+    }
     
     const files = e.dataTransfer.files;
     if (files.length > 0) {
@@ -1477,7 +1623,8 @@ function resetCanvas() {
     fabricCanvas.clear();
     fabricCanvas.backgroundColor = '#ffffff';
     clearGridLines(); // Clear any grid lines (they're not part of fabricCanvas)
-    currentMosaicTemplate = null; // Reset mosaic template
+    activeTemplateObject = null; // Reset the active template
+    selectedTemplateIdentifier = null; // Reset the selected identifier
     gridLines = []; // Reset grid lines array
     fabricCanvas.renderAll();
     fileErrorMsg.style.display = 'none';
@@ -1498,6 +1645,10 @@ function resetCanvas() {
 async function saveAsPdf() {
     loadingIndicator.style.display = 'block';
     savePdfButton.disabled = true;
+
+    // Temporarily hide grid lines and remove clipping for export
+    gridLines.forEach(line => line.set({ visible: false }));
+    fabricCanvas.getObjects().forEach(obj => obj.set('clipPath', null));
 
     const activeObject = fabricCanvas.getActiveObject();
     fabricCanvas.discardActiveObject();
@@ -1562,6 +1713,10 @@ async function saveAsPdf() {
         if (activeObject) {
             fabricCanvas.setActiveObject(activeObject);
         }
+        // Restore grid lines visibility and clipping
+        gridLines.forEach(line => line.set({ visible: true }));
+        fabricCanvas.getObjects().forEach(applyCellClipping);
+
         loadingIndicator.style.display = 'none';
         savePdfButton.disabled = false;
         fabricCanvas.renderAll();
@@ -1615,8 +1770,8 @@ function setupEventListeners() {
         updateCanvasSize();
         
         // Reapply mosaic template if one exists
-        if (currentMosaicTemplate) {
-            applyMosaicTemplate(currentMosaicTemplate.template);
+        if (activeTemplateObject) {
+            applyMosaicTemplate(activeTemplateObject.identifier);
         }
     });
 
@@ -1624,15 +1779,13 @@ function setupEventListeners() {
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        dropZone.classList.remove('bg-gray-100');
-        dropZone.classList.add('bg-gray-200');
+        dropZone.classList.add('bg-base-300');
     });
     
     dropZone.addEventListener('dragleave', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        dropZone.classList.remove('bg-gray-200');
-        dropZone.classList.add('bg-gray-100');
+        dropZone.classList.remove('bg-base-300');
     });
     
     dropZone.addEventListener('drop', handleStagingFileDrop);
@@ -1647,10 +1800,12 @@ function setupEventListeners() {
     });
     
     // Auto-arrange button
-    autoArrangeBtn.addEventListener('click', autoArrangeImages);
+    autoArrangeBtn.addEventListener('click', () => autoArrangeImages(false));
     
     // Clear selection button
-    clearSelectionBtn.addEventListener('click', clearSelection);
+    if(clearSelectionBtn) {
+        clearSelectionBtn.addEventListener('click', clearSelection);
+    }
 
     // Canvas drag listeners (prevent old behavior)
     canvasContainer.addEventListener('dragover', (e) => {
@@ -1676,18 +1831,17 @@ function setupEventListeners() {
     // Mosaic template listeners
     document.querySelectorAll('.mosaic-template').forEach(template => {
         template.addEventListener('click', (e) => {
-            // Highlight selected template
             document.querySelectorAll('.mosaic-template').forEach(t => {
-                t.classList.remove('border-pwint-magenta', 'bg-pink-50');
-                t.classList.add('border-gray-300');
+                t.classList.remove('border-secondary', 'ring-2', 'ring-secondary');
             });
-            template.classList.remove('border-gray-300');
-            template.classList.add('border-pwint-magenta', 'bg-pink-50');
+            const clickedButton = e.currentTarget;
+            clickedButton.classList.add('border-secondary', 'ring-2', 'ring-secondary');
             
-            // Show/hide custom grid controls
-            const templateType = template.getAttribute('data-template');
-            if (templateType === 'custom') {
-                customGridControls.style.display = 'block';
+            const templateValue = clickedButton.getAttribute('data-template');
+            selectedTemplateIdentifier = templateValue; // Set the identifier
+
+            if (templateValue === 'custom') {
+                customGridControls.style.display = 'grid';
             } else {
                 customGridControls.style.display = 'none';
             }
@@ -1696,12 +1850,12 @@ function setupEventListeners() {
     
     // Apply mosaic button
     applyMosaicButton.addEventListener('click', () => {
-        const selectedTemplate = document.querySelector('.mosaic-template.border-pwint-magenta');
-        if (selectedTemplate) {
-            const templateType = selectedTemplate.getAttribute('data-template');
-            applyMosaicTemplate(templateType);
+        if (selectedTemplateIdentifier) {
+            applyMosaicTemplate(selectedTemplateIdentifier);
+            // After applying a template, also update the fit to cell button status
+            handleObjectSelection();
         } else {
-            showFileError('Please select a mosaic template first.');
+            showFileError('Please select a template first.');
         }
     });
     
@@ -1725,8 +1879,8 @@ function setupEventListeners() {
         resizeTimeout = setTimeout(() => {
             updateCanvasSize();
             // Reapply mosaic template if one exists
-            if (currentMosaicTemplate) {
-                applyMosaicTemplate(currentMosaicTemplate.template);
+            if (activeTemplateObject) {
+                applyMosaicTemplate(activeTemplateObject.identifier);
             }
         }, 100);
     });
@@ -1745,6 +1899,93 @@ function setupEventListeners() {
             const type = e.target.getAttribute('data-type');
             unselectAllImages(type);
         });
+    });
+
+    // Fit to cell button
+    fitToCellBtn.addEventListener('click', fitSelectedObjectToCell);
+
+    // Contextual Cell Action listeners
+    centerInCellBtn.addEventListener('click', centerInCell);
+    fillCellBtn.addEventListener('click', fillCell);
+
+    fabricCanvas.on('selection:created', handleObjectSelection);
+    fabricCanvas.on('selection:updated', handleObjectSelection);
+    fabricCanvas.on('selection:cleared', handleObjectDeselection);
+
+    fabricCanvas.on('object:modified', (e) => {
+        const obj = e.target;
+        if (!obj || !activeTemplateObject) {
+            // If the object is dropped and there is no active template,
+            // ensure it has no grid data.
+            if (obj && typeof obj.gridRow !== 'undefined') {
+                obj.set({ gridRow: undefined, gridCol: undefined });
+                applyCellClipping(obj); // This will remove the clip path
+                obj.setCoords();
+                fabricCanvas.renderAll();
+            }
+            return;
+        }
+
+        const { cellWidth, cellHeight, cols, rows } = activeTemplateObject;
+        const center = obj.getCenterPoint();
+
+        // Determine the target cell from the drop location
+        const targetCol = Math.floor(center.x / cellWidth);
+        const targetRow = Math.floor(center.y / cellHeight);
+
+        // Check if the drop is outside the grid
+        if (targetCol < 0 || targetCol >= cols || targetRow < 0 || targetRow >= rows) {
+            // Object was dropped outside the grid, so remove its grid properties
+            if (typeof obj.gridRow !== 'undefined') {
+                obj.set({ gridRow: undefined, gridCol: undefined });
+                applyCellClipping(obj); // This will remove the clip path
+                obj.setCoords();
+                fabricCanvas.renderAll();
+            }
+            return;
+        }
+
+        // Find if another object is already in the target cell
+        const targetObject = fabricCanvas.getObjects().find(other => {
+            return other !== obj && other.gridRow === targetRow && other.gridCol === targetCol;
+        });
+
+        if (targetObject) {
+            // If dropping on another object, swap them
+            swapObjects(obj, targetObject);
+        } else {
+            // If dropping on an empty cell or resizing within a cell,
+            // update its position and clipping.
+            const padding = (parseInt(templatePaddingInput.value, 10) || 0) - PADDING_OFFSET;
+            const targetX = targetCol * cellWidth + padding;
+            const targetY = targetRow * cellHeight + padding;
+            const targetWidth = cellWidth - (padding * 2);
+            const targetHeight = cellHeight - (padding * 2);
+
+            // Update grid position data
+            obj.set({
+                gridRow: targetRow,
+                gridCol: targetCol
+            });
+
+            // Re-center the object within the cell.
+            // This is desirable for both dropping and resizing to maintain alignment.
+            obj.set({
+                 left: targetX + (targetWidth - obj.getScaledWidth()) / 2,
+                 top: targetY + (targetHeight - obj.getScaledHeight()) / 2,
+            });
+
+            // ALWAYS apply clipping after determining the cell
+            applyCellClipping(obj);
+            obj.setCoords();
+        }
+        fabricCanvas.renderAll();
+    });
+
+    templatePaddingInput.addEventListener('input', () => {
+        if(activeTemplateObject) {
+            autoArrangeImages(true); // Re-apply the layout with new padding
+        }
     });
 }
 

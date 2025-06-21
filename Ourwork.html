@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Work - Pwint.ca</title>
+    <style>
+        :root {
+            --cyan: #00bcd4;
+            --magenta: #e91e63;
+            --yellow: #cc9900;
+            --black: #212121;
+            --gradient-primary: linear-gradient(135deg, #00bcd4, #e91e63, #cc9900);
+            --text-dark: #212121;
+            --text-gray: #555555;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .pwint-gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* New Navigation Styles */
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 30px;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .nav-logo img {
+            max-width: 120px;
+            height: auto;
+        }
+        .logo-text {
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-gray);
+            font-weight: 500;
+            font-size: 1.05em;
+            position: relative;
+            padding: 5px 2px;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover {
+            color: var(--text-dark);
+        }
+        .nav-links a:not(.nav-cta)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:not(.nav-cta):hover::after {
+            width: 100%;
+        }
+        
+        .cta-button, .nav-cta {
+            padding: 10px 22px;
+            font-size: 1.05em;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            background: var(--gradient-primary);
+            color: white !important; /* important to override link styles */
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .cta-button:hover, .nav-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Gallery Section Styles */
+        .gallery-section {
+            padding: 60px 20px;
+            background-color: #ffffff;
+        }
+        .gallery-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .gallery-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .gallery-subtitle {
+            font-size: 1.2em;
+            color: var(--text-gray);
+            margin-bottom: 40px;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .main-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-nav">
+        <a href="index.html" class="nav-logo">
+            <img src="pwint.png" alt="Pwint.ca Home">
+            <span class="logo-text pwint-gradient-text">Pwint</span>
+        </a>
+        <div class="nav-links">
+            <a href="imager.html">Poster Designer</a>
+            <a href="mosaic.html">Custom Mosaics</a>
+            <a href="Ourwork.html">Our Work</a>
+            <a href="mailto:info@pwint.ca?subject=Quote%20Request" class="nav-cta">Get a Quote</a>
+        </div>
+    </header>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section" id="our-work">
+        <div class="gallery-container">
+            <h2 class="gallery-title">Our Work Showcase</h2>
+            <p class="gallery-subtitle">A glimpse of the beautiful prints we've created for our clients.</p>
+            <div class="gallery-grid">
+                <div class="gallery-item"><img src="samples/Stunning.jpg" alt="Stunning Print Example"></div>
+                <div class="gallery-item"><img src="samples/Professional.jpg" alt="Professional Print Example"></div>
+                <div class="gallery-item"><img src="samples/Lively.jpg" alt="Lively Print Example"></div>
+                <div class="gallery-item"><img src="samples/Wanted.jpg" alt="Wanted Print Example"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Copyright and Trademark Footer -->
+    <div style="text-align: center; padding: 20px; margin-top: 30px; border-top: 1px solid #eee; color: #777; font-size: 0.8rem;">
+        <p>2025 Pwint.ca. All rights reserved. Pwint® is a registered trademark.</p>
+    </div>
+</body>
+</html>

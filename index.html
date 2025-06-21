@@ -29,79 +29,112 @@
             overflow-x: hidden;
         }
 
-        .hero {
-            height: 100vh;
+        /* New Navigation Styles */
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 30px;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo {
             display: flex;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-            padding: 0 20px;
-            background-color: #ffffff;
+            gap: 12px;
+            text-decoration: none;
         }
-
-        .hero::before {
-            display: none;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .logo-container {
-            margin-bottom: 30px;
-        }
-
-        .logo {
-            max-width: 200px;
+        .nav-logo img {
+            max-width: 120px;
             height: auto;
         }
-
-        h1 {
-            font-size: 4em;
-            margin-bottom: 20px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: titleAnimation 2s ease-in-out infinite alternate;
+        .logo-text {
+            font-size: 1.4em;
+            font-weight: 600;
         }
-
-        .subtitle {
-            font-size: 1.5em;
-            margin-bottom: 30px;
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-gray);
+            font-weight: 500;
+            font-size: 1.05em;
+            position: relative;
+            padding: 5px 2px;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover {
             color: var(--text-dark);
-            font-weight: bold;
+        }
+        .nav-links a:not(.nav-cta)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:not(.nav-cta):hover::after {
+            width: 100%;
+        }
+
+        .main-header {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .main-header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
             background: var(--gradient-primary);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
-
-        .trademark {
-            font-size: 0.8em;
-            color: var(--magenta);
-            margin-top: 10px;
+        .pwint-gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .main-header h2 {
+            font-size: 1.5em;
+            color: var(--text-gray);
+            font-weight: normal;
         }
 
-        .cta-button {
-            padding: 15px 30px;
-            font-size: 1.2em;
+        .cta-button, .nav-cta {
+            padding: 10px 22px;
+            font-size: 1.05em;
             border: none;
             border-radius: 30px;
             cursor: pointer;
             background: var(--gradient-primary);
-            color: white;
+            color: white !important; /* important to override link styles */
             text-transform: uppercase;
             font-weight: bold;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
         }
 
-        .cta-button:hover {
-            transform: translateY(-5px);
+        .cta-button:hover, .nav-cta:hover {
+            transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: #ffffff;
         }
 
         .features {
@@ -147,6 +180,134 @@
             font-weight: bold;
         }
 
+        /* Carousel Styles */
+        .carousel-section {
+            padding: 60px 20px;
+            padding-top: 0; /* No top padding as it's at the top */
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+
+        .carousel-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .carousel-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .carousel-subtitle {
+            font-size: 1.2em;
+            color: var(--text-gray);
+            margin-bottom: 40px;
+        }
+
+        .carousel-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .carousel-inner {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            position: relative;
+        }
+
+        .carousel-item img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+        }
+
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 30px;
+            text-align: left;
+        }
+
+        .carousel-caption h3 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .carousel-caption p {
+            font-size: 1.1em;
+            color: #ffffff;
+        }
+
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .carousel-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .carousel-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .carousel-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--magenta);
+        }
+
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: var(--magenta);
+            transform: scale(1.3);
+        }
+
         .location {
             text-align: center;
             padding: 40px 20px;
@@ -161,6 +322,44 @@
         .location p {
             color: var(--text-gray);
             margin-bottom: 20px;
+        }
+
+        /* Mosaic Section Styles */
+        .mosaic-section {
+            padding: 60px 20px;
+            background-color: #f8f9fa;
+        }
+        .mosaic-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        .mosaic-image {
+            flex: 1;
+        }
+        .mosaic-image img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .mosaic-content {
+            flex: 1;
+            text-align: left;
+        }
+        .mosaic-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .mosaic-description {
+            font-size: 1.2em;
+            color: var(--text-gray);
+            margin-bottom: 30px;
         }
 
         @keyframes titleAnimation {
@@ -182,22 +381,108 @@
             .features {
                 grid-template-columns: 1fr;
             }
+            .carousel-item img {
+                height: 300px;
+            }
+            .carousel-title {
+                font-size: 2em;
+            }
+            .mosaic-container {
+                flex-direction: column;
+            }
+            .mosaic-content {
+                text-align: center;
+            }
+            .main-header {
+                flex-direction: column;
+                gap: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <section class="hero">
-        <div class="hero-content">
-            <div class="logo-container">
-                <img src="pwint.png" alt="Pwint.ca" class="logo">
+    <header class="main-nav">
+        <a href="index.html" class="nav-logo">
+            <img src="pwint.png" alt="Pwint.ca Home">
+            <span class="logo-text pwint-gradient-text">Pwint</span>
+        </a>
+        <div class="nav-links">
+            <a href="imager.html">Poster Designer</a>
+            <a href="mosaic.html">Custom Mosaics</a>
+            <a href="Ourwork.html">Our Work</a>
+            <a href="mailto:info@pwint.ca?subject=Quote%20Request" class="nav-cta">Get a Quote</a>
+        </div>
+    </header>
+
+    <section class="main-header">
+        <h1>Experience Pwint Quality</h1>
+        <h2>Large Format Printing Specialists</h2>
+    </section>
+
+    <!-- Quality Showcase Carousel -->
+    <section class="carousel-section">
+        <div class="carousel-container">
+            <h2 class="carousel-title">Experience Pwint Quality</h2>
+            <p class="carousel-subtitle">See the stunning results our customers love</p>
+            
+            <div class="carousel-wrapper">
+                <div class="carousel-inner" id="carouselInner">
+                    <div class="carousel-item">
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=500&fit=crop" alt="High quality map print">
+                        <div class="carousel-caption">
+                            <h3>Crystal Clear Maps</h3>
+                            <p>Every detail matters. Our 42" premium prints showcase maps with incredible precision.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1200&h=500&fit=crop" alt="Vibrant photo print">
+                        <div class="carousel-caption">
+                            <h3>Vibrant Photo Prints</h3>
+                            <p>Colors that pop! Our photo prints bring your memories to life in stunning detail.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="samples/poster1.PNG" alt="Custom photo mosaic">
+                        <div class="carousel-caption">
+                            <h3>Custom Photo Mosaics</h3>
+                            <p>Turn hundreds of your favorite photos into a single, stunning piece of art. <a href="mosaic.html" style="color:white; text-decoration:underline;">Learn More</a>.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1200&h=500&fit=crop" alt="Art print showcase">
+                        <div class="carousel-caption">
+                            <h3>Museum-Quality Art Prints</h3>
+                            <p>Gallery-worthy prints that transform any space. Available in multiple sizes and finishes.</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="https://images.unsplash.com/photo-1554080353-a576cf803bda?w=1200&h=500&fit=crop" alt="Professional poster">
+                        <div class="carousel-caption">
+                            <h3>Professional Posters</h3>
+                            <p>From business presentations to event promotions, we deliver impact at any scale.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="carousel-controls">
+                    <button class="carousel-btn" id="prevBtn">
+                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    </button>
+                    <button class="carousel-btn" id="nextBtn">
+                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </button>
+                </div>
             </div>
-            <h1 class="animate-title">Pwint.ca</h1>
-            <p class="subtitle">Large Format Printing Specialists</p>
-            <p class="trademark">Pwint® Registered Trademark</p>
-            <div class="cta-buttons">
-                <button class="cta-button" onclick="location.href='mailto:info@pwint.ca?subject=Quote%20Request%20-%20Large%20Format%20Printing'">Get a Quote</button>
-                <button class="cta-button" onclick="location.href='imager.html'">Create your poster now</button>
-            </div>
+            
+            <div class="carousel-indicators" id="indicators"></div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="cta-buttons">
+            <button class="cta-button" onclick="location.href='imager.html'">Create your poster now</button>
+            <button class="cta-button" onclick="location.href='photobooth-designer.html'">Photo Booth Designer</button>
+            <button class="cta-button" onclick="location.href='mailto:info@pwint.ca?subject=Quote%20Request%20-%20Large%20Format%20Printing'">Get a Quote</button>
         </div>
     </section>
 
@@ -216,14 +501,34 @@
             <p class="price-highlight">24" Photo Paper</p>
             <p>Available in Gloss or Matte finish</p>
         </div>
+        <div class="feature-card" onclick="location.href='mosaic.html'" style="cursor: pointer;">
+            <div class="feature-icon">🎨</div>
+            <h3 style="color: var(--yellow)">Custom Mosaics</h3>
+            <p>Create a stunning poster from hundreds of your favorite photos.</p>
+            <p class="price-highlight">Unique & Personal</p>
+        </div>
         <div class="feature-card">
             <div class="feature-icon">✨</div>
-            <h3 style="color: var(--cyan)">Custom Prints</h3>
+            <h3 style="color: var(--cyan)">And More!</h3>
             <p>Tailored to your needs</p>
             <p>Professional quality</p>
             <p>Fast turnaround time</p>
         </div>
     </div>
+
+    <!-- Mosaic Showcase Section -->
+    <section class="mosaic-section">
+        <div class="mosaic-container">
+            <div class="mosaic-image">
+                <img src="samples/poster1.PNG" alt="Photo Mosaic Sample">
+            </div>
+            <div class="mosaic-content">
+                <h2 class="mosaic-title">Custom Photo Mosaics</h2>
+                <p class="mosaic-description">Provide us with a main picture and hundreds (or thousands) of your other photos, and we will create a stunning, high-resolution mosaic. This is a custom service currently offered offline. Contact us to learn more!</p>
+                <button class="cta-button" onclick="location.href='mailto:info@pwint.ca?subject=Inquiry%20about%20Custom%20Photo%20Mosaic'">Inquire About Mosaics</button>
+            </div>
+        </div>
+    </section>
 
     <div class="location">
         <h2>Serving the Ottawa Area</h2>
@@ -237,6 +542,78 @@
     </div>
 
     <script>
+        // Carousel functionality
+        const carousel = {
+            currentIndex: 0,
+            totalItems: 5,
+            autoPlayInterval: null,
+            
+            init() {
+                this.createIndicators();
+                this.bindEvents();
+                this.startAutoPlay();
+            },
+            
+            createIndicators() {
+                const indicatorsContainer = document.getElementById('indicators');
+                for (let i = 0; i < this.totalItems; i++) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'indicator' + (i === 0 ? ' active' : '');
+                    indicator.addEventListener('click', () => this.goToSlide(i));
+                    indicatorsContainer.appendChild(indicator);
+                }
+            },
+            
+            bindEvents() {
+                document.getElementById('prevBtn').addEventListener('click', () => this.prev());
+                document.getElementById('nextBtn').addEventListener('click', () => this.next());
+                
+                // Pause on hover
+                const wrapper = document.querySelector('.carousel-wrapper');
+                wrapper.addEventListener('mouseenter', () => this.stopAutoPlay());
+                wrapper.addEventListener('mouseleave', () => this.startAutoPlay());
+            },
+            
+            updateCarousel() {
+                const carouselInner = document.getElementById('carouselInner');
+                const offset = -this.currentIndex * 100;
+                carouselInner.style.transform = `translateX(${offset}%)`;
+                
+                // Update indicators
+                document.querySelectorAll('.indicator').forEach((ind, idx) => {
+                    ind.classList.toggle('active', idx === this.currentIndex);
+                });
+            },
+            
+            next() {
+                this.currentIndex = (this.currentIndex + 1) % this.totalItems;
+                this.updateCarousel();
+            },
+            
+            prev() {
+                this.currentIndex = (this.currentIndex - 1 + this.totalItems) % this.totalItems;
+                this.updateCarousel();
+            },
+            
+            goToSlide(index) {
+                this.currentIndex = index;
+                this.updateCarousel();
+            },
+            
+            startAutoPlay() {
+                this.autoPlayInterval = setInterval(() => this.next(), 4000);
+            },
+            
+            stopAutoPlay() {
+                clearInterval(this.autoPlayInterval);
+            }
+        };
+        
+        // Initialize carousel when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            carousel.init();
+        });
+
         // Add smooth scroll behavior
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {

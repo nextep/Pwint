@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Photo Mosaics - Pwint.ca</title>
+    <style>
+        :root {
+            --cyan: #00bcd4;
+            --magenta: #e91e63;
+            --yellow: #cc9900;
+            --black: #212121;
+            --gradient-primary: linear-gradient(135deg, #00bcd4, #e91e63, #cc9900);
+            --text-dark: #212121;
+            --text-gray: #555555;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* New Navigation Styles */
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 30px;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .nav-logo img {
+            max-width: 120px;
+            height: auto;
+        }
+        .logo-text {
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-gray);
+            font-weight: 500;
+            font-size: 1.05em;
+            position: relative;
+            padding: 5px 2px;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover {
+            color: var(--text-dark);
+        }
+        .nav-links a:not(.nav-cta)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:not(.nav-cta):hover::after {
+            width: 100%;
+        }
+        
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #eee;
+            height: auto;
+        }
+
+        .header-logo {
+            max-width: 150px;
+            height: auto;
+        }
+
+        .cta-button, .nav-cta {
+            padding: 10px 22px;
+            font-size: 1.05em;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            background: var(--gradient-primary);
+            color: white !important; /* important to override link styles */
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .cta-button:hover, .nav-cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .mosaic-hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .mosaic-hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .pwint-gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .mosaic-hero p {
+            font-size: 1.3em;
+            color: var(--text-gray);
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+        }
+
+        .mosaic-hero img {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--text-dark);
+        }
+        
+        .how-it-works {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+
+        .step-card {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #eee;
+        }
+
+        .step-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--cyan);
+            margin-bottom: 15px;
+        }
+
+        .step-card h3 {
+            font-size: 1.5em;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+        }
+
+        .step-card p {
+            color: var(--text-gray);
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            text-align: left;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .feature-icon {
+            font-size: 2em;
+            color: var(--magenta);
+        }
+        .feature-item h4 {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .download-section {
+            text-align: center;
+        }
+
+        .download-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .download-link {
+            font-size: 1.1em;
+            color: var(--magenta);
+            text-decoration: none;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 2px solid var(--magenta);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .download-link:hover {
+            background: var(--magenta);
+            color: white;
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 40px;
+            background-color: #f8f9fa;
+            border-radius: 20px;
+        }
+
+        .footer {
+            text-align: center; 
+            padding: 20px; 
+            margin-top: 30px; 
+            border-top: 1px solid #eee; 
+            color: #777; 
+            font-size: 0.8rem;
+        }
+
+    </style>
+</head>
+<body>
+    <header class="main-nav">
+        <a href="index.html" class="nav-logo">
+            <img src="pwint.png" alt="Pwint.ca Home">
+            <span class="logo-text pwint-gradient-text">Pwint</span>
+        </a>
+        <div class="nav-links">
+            <a href="imager.html">Poster Designer</a>
+            <a href="mosaic.html">Custom Mosaics</a>
+            <a href="Ourwork.html">Our Work</a>
+            <a href="mailto:info@pwint.ca?subject=Quote%20Request" class="nav-cta">Get a Quote</a>
+        </div>
+    </header>
+
+    <div class="page-container">
+        <section class="mosaic-hero">
+            <h1>Create Art From Your Memories</h1>
+            <p>We transform your collection of personal photos into a single, breathtaking piece of art. Using one main image as a template, we meticulously arrange hundreds or even thousands of your pictures to recreate it in stunning detail.</p>
+            <img src="samples/Mosaic.jpg" alt="A beautiful photo mosaic of a landscape created from hundreds of smaller images.">
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">How It Works</h2>
+            <div class="how-it-works">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>You Provide the Photos</h3>
+                    <p>Choose one high-quality photo to be your main image, and gather a collection of the pictures you want us to build it with.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>We Work Our Magic</h3>
+                    <p>Our specialized software and artists analyze each photo for color and tone, then carefully place them to create your mosaic.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Receive Your Masterpiece</h3>
+                    <p>You get a super high-resolution digital file, ready for printing at a massive scale without losing any of the tiny details.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Key Features</h2>
+            <div class="features-list">
+                <div class="feature-item">
+                    <div class="feature-icon">🖼️</div>
+                    <div>
+                        <h4>Ultra-High Resolution</h4>
+                        <p>Our mosaics are generated at an incredible resolution, ensuring both the main image and the tiny photos are sharp.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎨</div>
+                    <div>
+                        <h4>Fully Customizable</h4>
+                        <p>You have full control. Provide any main image and as many tile photos as you'd like for a truly personal creation.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">✨</div>
+                    <div>
+                        <h4>Professional Quality</h4>
+                        <p>We use advanced techniques to ensure a seamless and beautiful result, perfect for printing and framing.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section download-section">
+            <h2 class="section-title">See the Detail for Yourself</h2>
+            <p class="mosaic-hero-p">The magic is in the details. Click on any of the links below to open the full-resolution samples in a new tab to zoom in and see the quality up close. Files are large and may take time to load.</p>
+            <div class="download-links">
+                <a href="samples/mosaic/buddy-300-1_regular.png" target="_blank" class="download-link">buddy-300-1_regular.png (567MB)</a>
+                <a href="samples/mosaic/buddy-300-2_regular.png" target="_blank" class="download-link">buddy-300-2_regular.png (599MB)</a>
+                <a href="samples/mosaic/mosaic-50-1_regular.png" target="_blank" class="download-link">mosaic-50-1_regular.png (19MB)</a>
+                <a href="samples/mosaic/mosaic-100-2_regular.png" target="_blank" class="download-link">mosaic-100-2_regular.png (63MB)</a>
+                <a href="samples/mosaic/mosaic-150-1_regular.png" target="_blank" class="download-link">mosaic-150-1_regular.png (125MB)</a>
+                <a href="samples/mosaic/mosaic-200-1_regular.png" target="_blank" class="download-link">mosaic-200-1_regular.png (199MB)</a>
+                <a href="samples/mosaic/mosaic-250-1_regular.png" target="_blank" class="download-link">mosaic-250-1_regular.png (287MB)</a>
+                <a href="samples/mosaic/mosaic-300-1_regular.png" target="_blank" class="download-link">mosaic-300-1_regular.png (386MB)</a>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <h2 style="font-size: 2em; margin-bottom: 20px;">Ready to Create Your Own Mosaic?</h2>
+            <p style="font-size: 1.2em; color: var(--text-gray); margin-bottom: 30px;">This is a custom, offline service. Contact us today for a personalized quote.</p>
+            <a href="mailto:info@pwint.ca?subject=Inquiry%20about%20Custom%20Photo%20Mosaic" class="cta-button">Inquire Now</a>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <p>2025 Pwint.ca. All rights reserved. Pwint® is a registered trademark.</p>
+    </footer>
+</body>
+</html> 

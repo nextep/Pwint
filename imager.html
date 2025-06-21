@@ -25,67 +25,42 @@
                         'pwint-magenta': '#e91e63',
                         'pwint-yellow': '#cc9900',
                         'pwint-black': '#212121',
+                        'primary': '#00bcd4',
+                        'secondary': '#e91e63',
+                        'accent': '#cc9900',
+                        'base-100': '#FFFFFF',
+                        'base-200': '#F9FAFB',
+                        'base-300': '#F3F4F6',
                     }
                 }
             }
         }
-        
-        // Update function for highlighting selected template
-        document.addEventListener('DOMContentLoaded', function() {
-            // Update template selection
-            document.querySelectorAll('.mosaic-template').forEach(template => {
-                template.addEventListener('click', (e) => {
-                    // Highlight selected template
-                    document.querySelectorAll('.mosaic-template').forEach(t => {
-                        t.classList.remove('border-pwint-magenta', 'bg-pink-50');
-                        t.classList.add('border-gray-300');
-                    });
-                    template.classList.remove('border-gray-300');
-                    template.classList.add('border-pwint-magenta', 'bg-pink-50');
-                    
-                    // Show custom controls if custom template selected
-                    if (template.getAttribute('data-template') === 'custom') {
-                        document.getElementById('custom-grid-controls').style.display = 'grid';
-                    } else {
-                        document.getElementById('custom-grid-controls').style.display = 'none';
-                    }
-                });
-            });
-            
-            // Make sure the button styling is updated in print-designer.js too
-            // This adds a note to check for any hardcoded colors in the JS file
-            console.log('Pwint styling loaded successfully');
-        });
     </script>
     <style>
         :root {
-            --cyan: #00bcd4;
-            --magenta: #e91e63;
-            --yellow: #cc9900;
-            --black: #212121;
             --gradient-primary: linear-gradient(135deg, #00bcd4, #e91e63, #cc9900);
         }
-        
-        /* Basic styling for drag-over effect */
-        .drag-over {
-            border: 2px dashed var(--magenta);
-            background-color: rgba(233, 30, 99, 0.1);
+        body {
+            background-color: #F9FAFB; /* bg-base-200 */
         }
-        /* Canvas container: border, centering */
+        .pwint-gradient-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
         #canvas-container {
-            /* Width/Height set by JS */
-            margin: 0 auto; /* Center the container */
-            border: 1px solid #ccc;
+            margin: 0 auto;
+            border: 1px solid #e5e7eb; /* border-gray-200 */
             position: relative;
-            overflow: hidden; /* Hide canvas overflow if width is constrained */
-            background-color: #f8f9fa; /* Background for the container itself */
+            overflow: hidden;
+            background-color: #ffffff; /* bg-white */
         }
-        /* Canvas wrapper: background, takes size from JS */
         .canvas-wrapper {
-             position: relative; /* Needed for absolute canvas positioning */
-             /* Width/Height set by JS */
-             background-color: #e9ecef; /* Background for the wrapper inside container */
-             margin: 0; /* No margin needed if container size matches */
+             position: relative;
+             background-color: #f3f4f6; /* bg-base-300 */
+             margin: 0;
         }
         .canvas-wrapper canvas {
             position: absolute;
@@ -95,416 +70,223 @@
             height: 100%;
             display: block;
         }
-         /* Style for loading indicator */
         #loading-indicator {
-            position: fixed;
-            top: 50%;
-            left: 50%;
+            position: fixed; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 0.5rem;
-            z-index: 1000;
-            display: none; /* Hidden by default */
-            font-family: 'Inter', sans-serif;
+            color: white; padding: 1rem 2rem;
+            border-radius: 0.5rem; z-index: 1000;
+            display: none; font-family: 'Inter', sans-serif;
         }
-        /* Ensure fabric controls are visible */
-        .fabric-controls {
-             z-index: 10;
-        }
-        
-        /* Custom styling for Fabric.js controls */
-        .canvas-container .corner {
-            width: 10px !important;
-            height: 10px !important;
-            border-radius: 50% !important;
-            background-color: var(--magenta) !important;
-            border: 1px solid white !important;
-        }
-        
-        /* Adjust size of corners based on canvas scale */
-        .canvas-container .canvas-wrapper.small-canvas .corner {
-            width: 6px !important;
-            height: 6px !important;
-        }
-        
-        .canvas-container .canvas-wrapper.large-canvas .corner {
-            width: 14px !important;
-            height: 14px !important;
+        .drag-over {
+            border: 2px dashed #e91e63; /* border-pwint-magenta */
+            background-color: rgba(233, 30, 99, 0.1);
         }
         
         /* Image carousel styling */
-        #portrait-carousel, #landscape-carousel {
+        .image-carousel {
             overflow-x: auto;
             overflow-y: hidden;
             white-space: nowrap;
-            padding: 4px 0 10px 0; /* Increased bottom padding for scale buttons */
-            /* Show scrollbar on all browsers */
-            scrollbar-width: thin; /* Firefox */
-            scrollbar-color: #d1d5db transparent; /* Firefox */
-            min-height: 245px; /* Increased minimum height to accommodate two rows of scale buttons */
+            padding-bottom: 10px;
+            scrollbar-width: thin;
+            scrollbar-color: #00bcd4 transparent; /* scrollbar-pwint-cyan */
+            min-height: 255px; /* Ensure space for thumbnails and controls */
         }
-        
-        /* Webkit scrollbar styling */
-        #portrait-carousel::-webkit-scrollbar,
-        #landscape-carousel::-webkit-scrollbar {
-            height: 8px;
-        }
-        
-        #portrait-carousel::-webkit-scrollbar-track,
-        #landscape-carousel::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        
-        #portrait-carousel::-webkit-scrollbar-thumb,
-        #landscape-carousel::-webkit-scrollbar-thumb {
-            background-color: var(--cyan);
+        .image-carousel::-webkit-scrollbar { height: 8px; }
+        .image-carousel::-webkit-scrollbar-track { background: transparent; }
+        .image-carousel::-webkit-scrollbar-thumb {
+            background-color: #00bcd4; /* bg-pwint-cyan */
             border-radius: 20px;
         }
-        
-        /* Image container styling */
-        #portrait-container, #landscape-container {
+        .image-container {
             display: inline-flex;
             flex-wrap: nowrap;
-            gap: 12px;
-            padding: 4px;
-            min-height: 235px; /* Increased to ensure space for larger thumbnails and two rows of scale buttons */
+            padding: 8px;
+            min-height: 245px; /* Increased to ensure thumbnail controls are visible */
         }
-        
-        /* Pwint gradient text */
-        .pwint-gradient-text {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .scale-group {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
         }
-        
-        /* Button style to match main site */
-        .pwint-button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            background: var(--gradient-primary);
+        .scale-group-header {
+            font-weight: 600;
+            background-color: #374151; /* bg-gray-700 */
             color: white;
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .pwint-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Footer styling */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: 30px;
-            border-top: 1px solid #eee;
-            color: #777;
+            padding: 4px 10px;
+            border-radius: 9999px;
             font-size: 0.8rem;
+        }
+        .scale-group-images {
+            display: inline-flex;
+        }
+        .thumbnail-controls {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
+            opacity: 0;
+            transition: opacity 0.3s;
+            padding-top: 20px; /* Space for gradient */
+        }
+        .group:hover .thumbnail-controls {
+            opacity: 1;
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans p-4 md:p-8">
-
-    <div class="container mx-auto bg-white p-6 rounded-lg shadow-lg">
-        <!-- Site header with logo -->
-        <div class="flex justify-center items-center mb-6">
-            <a href="index.html" class="flex items-center">
-                <img src="pwint.png" alt="Pwint.ca" class="h-12 mr-3">
-                <h1 class="text-3xl font-bold pwint-gradient-text">Pwint™ Designer</h1>
-            </a>
-        </div>
-
-        <!-- Help text for users -->
-        <div class="mb-4 p-3 bg-blue-50 rounded-md border border-blue-200 text-sm">
-            <div class="flex justify-between items-center">
-                <h2 class="font-semibold text-pwint-cyan mb-1 flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    Quick Tips
-                </h2>
-                <button id="toggle-tips" class="text-pwint-cyan hover:text-pwint-magenta focus:outline-none transition-colors">
-                    <span id="toggle-icon">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </span>
-                </button>
-            </div>
-            <div id="tips-content" class="mt-2 transition-all duration-300 overflow-hidden">
-                <ul class="list-disc pl-5 space-y-1">
-                    <li>Start by selecting a template or setting your paper size</li>
-                    <li>Drop your images into the image library below or click browse</li>
-                    <li>Click the + on an image in the library to add it to your canvas</li>
-                    <li>Resize your image using the preconfigured scale buttons</li>
-                    <li>Rotate your image by clicking on the half circle</li>
-                    <li>Select an image on the canvas and press Delete to remove it</li>
-                    <li>Use the Auto-Add button to add the selected images to the canvas</li>
-                    <li>When you're done, click Save PDF to download your design</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Consolidated Controls Section -->
-        <div class="mb-6 p-4 bg-gray-50 rounded-md border border-gray-200">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <!-- Paper and Size Controls -->
-            <div>
-                    <h2 class="text-md font-semibold text-gray-800 mb-2">Paper & Size Settings</h2>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label for="paper-type" class="block text-xs font-medium text-gray-700">Paper Type:</label>
-                            <select id="paper-type" class="w-full p-1 text-sm border border-gray-300 rounded-md">
-                                <option value="24">Gloss/Matte (24")</option>
+<body class="font-sans">
+    <div class="flex h-screen bg-base-200 overflow-hidden">
+        <!-- Collapsible, Condensed Sidebar -->
+        <aside id="sidebar" class="w-56 bg-base-100 p-2 shadow-lg transition-all duration-300 ease-in-out flex flex-col space-y-2 overflow-y-auto">
+            <h1 class="text-md font-bold pwint-gradient-text text-center flex-none">Controls</h1>
+            
+            <!-- Paper & Size Card -->
+            <div class="bg-base-100 p-2 rounded-lg border">
+                <h2 class="text-xs font-bold text-pwint-cyan mb-1">Paper & Size</h2>
+                <div class="space-y-2 text-sm">
+                    <select id="paper-type" class="w-full pl-2 py-1 border-gray-300 rounded-md text-xs" title="Paper Type">
+                        <option value="24" selected>Gloss/Matte (24")</option>
                                 <option value="42">Premium/Banner (42")</option>
                 </select>
-            </div>
-            <div>
-                            <label for="print-length-inches" class="block text-xs font-medium text-gray-700">Width (in):</label>
-                            <input type="number" id="print-length-inches" value="36" min="24" max="300" step="1" class="w-full p-1 text-sm border border-gray-300 rounded-md">
-            </div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Display size: 4.8"/8.4" high × (width ÷ 5)"</p>
-                </div>
-                
-                <!-- Template Controls -->
-                <div>
-                    <h2 class="text-md font-semibold text-gray-800 mb-2">Layout Templates</h2>
-                    <div class="grid grid-cols-3 gap-1 mb-1">
-                        <button class="mosaic-template p-1 border border-gray-300 rounded hover:border-pwint-magenta active:bg-pink-100" data-template="2x2" title="Create a 2×2 grid layout (4 images)">
-                            <div class="grid grid-cols-2 gap-1 h-8">
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                            </div>
-                 </button>
-                        <button class="mosaic-template p-1 border border-gray-300 rounded hover:border-pwint-magenta active:bg-pink-100" data-template="3x3" title="Create a 3×3 grid layout (9 images)">
-                            <div class="grid grid-cols-3 gap-1 h-8">
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                            </div>
-                        </button>
-                        <button class="mosaic-template p-1 border border-gray-300 rounded hover:border-pwint-magenta active:bg-pink-100" data-template="1x2" title="Create a 1×2 grid layout (2 images side by side)">
-                            <div class="grid grid-cols-2 gap-1 h-8">
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                            </div>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-1">
-                        <button class="mosaic-template p-1 border border-gray-300 rounded hover:border-pwint-magenta active:bg-pink-100" data-template="2x1" title="Create a 2×1 grid layout (2 images stacked)">
-                            <div class="grid grid-rows-2 gap-1 h-8">
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                            </div>
-                        </button>
-                        <button class="mosaic-template p-1 border border-gray-300 rounded hover:border-pwint-magenta active:bg-pink-100" data-template="1x3" title="Create a 1×3 grid layout (3 images side by side)">
-                            <div class="grid grid-cols-3 gap-1 h-8">
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                                <div class="bg-gray-200 rounded"></div>
-                            </div>
-                        </button>
-                        <button class="mosaic-template p-1 border border-gray-300 rounded hover:border-pwint-magenta active:bg-pink-100" data-template="custom" title="Create a custom grid with your specified rows and columns">
-                            <div class="flex items-center justify-center h-8 text-xs text-center text-gray-600">
-                                Custom
-                            </div>
-                        </button>
-                    </div>
-                    <div id="custom-grid-controls" style="display: none;" class="mt-2 grid grid-cols-2 gap-2">
-                        <div>
-                            <label for="custom-rows" class="block text-xs text-gray-700">Rows:</label>
-                            <input type="number" id="custom-rows" value="2" min="1" max="10" class="w-full p-1 text-xs border border-gray-300 rounded-md">
-                        </div>
-                        <div>
-                            <label for="custom-cols" class="block text-xs text-gray-700">Columns:</label>
-                            <input type="number" id="custom-cols" value="2" min="1" max="10" class="w-full p-1 text-xs border border-gray-300 rounded-md">
+                    <div class="flex items-center justify-between space-x-1">
+                         <label for="print-length-inches" class="font-medium text-xs">Width:</label>
+                         <input type="number" id="print-length-inches" value="18" class="w-16 pl-2 py-1 border-gray-300 rounded-md text-xs" placeholder="in">
+                         <button id="update-canvas-size" class="flex-shrink-0 bg-primary hover:bg-opacity-80 text-white font-bold py-1 px-2 rounded-full text-xs">Update</button>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Snap Controls and Action Buttons -->
-                <div>
-                    <h2 class="text-md font-semibold text-gray-800 mb-2">Settings & Actions</h2>
-                    <div class="flex flex-col space-y-2">
-                        <div class="flex space-x-4 mb-2">
-                            <div class="flex items-center">
-                                <input type="checkbox" id="snap-to-grid" class="mr-1 h-4 w-4 text-indigo-600">
-                                <label for="snap-to-grid" class="text-xs text-gray-700">Snap to Grid</label>
+            <!-- Template Card -->
+            <div class="bg-base-100 p-2 rounded-lg border">
+                <h2 class="text-xs font-bold text-pwint-magenta mb-1">Layout Templates</h2>
+                <div class="grid grid-cols-2 gap-1 mb-2">
+                    <button class="mosaic-template p-1 border border-gray-300 rounded-md hover:border-secondary" data-template="2x2" title="2x2"><div class="grid grid-cols-2 gap-0.5 h-7"><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div></div></button>
+                    <button class="mosaic-template p-1 border border-gray-300 rounded-md hover:border-secondary" data-template="4x3" title="4x3 Portrait"><div class="grid grid-cols-3 gap-0.5 h-7"><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div></div></button>
+                    <button class="mosaic-template p-1 border border-gray-300 rounded-md hover:border-secondary" data-template="3x4" title="3x4 Landscape"><div class="grid grid-cols-4 gap-0.5 h-7"><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div><div class="bg-gray-200 rounded-sm"></div></div></button>
+                    <button class="mosaic-template p-1 border border-gray-300 rounded-md hover:border-secondary" data-template="custom" title="Custom"><div class="flex items-center justify-center h-7 text-xs font-semibold text-gray-700">CUSTOM</div></button>
                             </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="snap-to-objects" checked class="mr-1 h-4 w-4 text-indigo-600">
-                                <label for="snap-to-objects" class="text-xs text-gray-700">Snap to Objects</label>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button id="update-canvas-size" class="bg-pwint-cyan hover:bg-cyan-700 text-white text-sm py-1 px-2 rounded" title="Update the canvas size based on your paper type and width settings">
-                                Update Canvas
-                            </button>
-                            <button id="apply-mosaic" class="bg-pwint-cyan hover:bg-cyan-700 text-white text-sm py-1 px-2 rounded" title="Apply the selected grid template to your canvas">
-                                Apply Template
-                            </button>
-                        </div>
-                    </div>
+                 <div id="custom-grid-controls" style="display: none;" class="flex items-center justify-between space-x-1 text-sm mb-2">
+                    <input type="number" id="custom-rows" value="3" class="w-16 pl-1 py-1 border-gray-300 rounded-md text-xs" placeholder="Rows">
+                     <span class="text-xs font-bold">x</span>
+                    <input type="number" id="custom-cols" value="4" class="w-16 pl-1 py-1 border-gray-300 rounded-md text-xs" placeholder="Cols">
                 </div>
+                <div class="flex items-center justify-between space-x-1 text-sm">
+                    <label for="template-padding" class="font-medium text-xs whitespace-nowrap">Spacing:</label>
+                    <input type="number" id="template-padding" value="10" class="w-12 pl-2 py-1 border-gray-300 rounded-md text-xs">
+                    <button id="apply-mosaic" class="flex-shrink-0 bg-secondary hover:bg-opacity-80 text-white font-bold py-1 px-2 rounded-full text-xs">Apply</button>
              </div>
         </div>
 
-        <div id="canvas-container">
-             <div class="canvas-wrapper">
-                 <canvas id="print-canvas"></canvas>
+            <!-- Snapping & Actions Card -->
+             <div class="bg-base-100 p-2 rounded-lg border">
+                <h2 class="text-xs font-bold text-pwint-yellow mb-2">Snapping & Actions</h2>
+                <div class="grid grid-cols-2 gap-x-2 gap-y-2 text-sm">
+                    <div class="flex items-center"><input type="checkbox" id="snap-to-grid" class="h-3.5 w-3.5 text-primary rounded"><label for="snap-to-grid" class="ml-1.5 text-xs">Grid</label></div>
+                    <div class="flex items-center"><input type="checkbox" id="snap-to-objects" checked class="h-3.5 w-3.5 text-primary rounded"><label for="snap-to-objects" class="ml-1.5 text-xs">Objects</label></div>
+                    <button id="auto-arrange-btn" class="bg-pwint-yellow hover:bg-opacity-80 text-white font-bold py-1 px-2 rounded-full text-xs">Auto-Add</button>
+                    <button id="clear-selection-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-1 px-2 rounded-full text-xs">Clear</button>
             </div>
-        </div>
-         <p class="text-xs text-center text-red-600 my-4" id="file-error" style="display: none;">Only image files (JPG, PNG, GIF, SVG) are allowed.</p>
-
-        <!-- Image Upload and Management Area -->
-        <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-3">
-                <h2 class="text-lg font-semibold pwint-gradient-text">Image Library</h2>
-                
-                <!-- Compact Upload Zone (moved and resized) -->
-                <div id="drop-zone" class="border-2 border-dashed border-pwint-magenta rounded-md p-2 bg-gray-100 hover:bg-gray-200 transition flex-grow mx-4 text-center md:max-w-xs">
-                    <div class="flex items-center justify-center">
-                        <svg class="w-5 h-5 text-pwint-magenta mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                        </svg>
-                        <div class="text-xs">
-                            <span class="text-gray-600">Drop images or</span>
-                            <label class="ml-1 cursor-pointer">
-                                <span class="text-pwint-magenta hover:text-pink-800 underline">browse</span>
-                                <input type="file" id="file-input" multiple accept="image/*" class="hidden">
-                            </label>
-                        </div>
-                    </div>
+                 <div class="mt-2 pt-2 border-t border-gray-200">
+                    <div class="flex items-center"><input type="checkbox" id="auto-fit-on-add" class="h-3.5 w-3.5 text-primary rounded"><label for="auto-fit-on-add" class="ml-1.5 text-xs">Auto-fit on add</label></div>
+                </div>
+                <p class="text-xs text-center text-red-600 mt-1" id="file-error" style="display: none;"></p>
                 </div>
                 
-                <div class="flex space-x-2 mt-2 md:mt-0">
-                    <button id="auto-arrange-btn" class="bg-pwint-yellow hover:bg-yellow-600 text-white py-1 px-3 rounded-md shadow transition text-sm" title="Automatically add your selected images in the grid layout">
-                        Auto-Add
-                    </button>
-                    <button id="clear-selection-btn" class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-md shadow transition text-sm" title="Clear all selected images">
-                        Clear Selection
-                    </button>
-                    <button id="reset-button" class="bg-pwint-magenta hover:bg-pink-700 text-white py-1 px-3 rounded-md shadow transition text-sm" title="Remove all images and reset the canvas to empty">
-                        Reset Canvas
-                    </button>
-                    <button id="save-pdf-button" class="bg-pwint-cyan hover:bg-cyan-700 text-white py-1 px-3 rounded-md shadow transition text-sm" title="Save your design as a printable PDF file">
-                        Save PDF
-                    </button>
+            <!-- Contextual Cell Actions (hidden by default) -->
+            <div id="cell-actions-card" class="bg-base-100 p-2 rounded-lg border" style="display: none;">
+                <h2 class="text-xs font-bold text-green-500 mb-2">Cell Actions (for selected)</h2>
+                <div class="grid grid-cols-1 gap-2 text-sm">
+                     <button id="center-in-cell-btn" class="bg-gray-200 hover:bg-gray-300 font-bold py-1 px-2 rounded-full text-xs">Center in Cell</button>
+                     <button id="fit-to-cell-btn" class="bg-gray-200 hover:bg-gray-300 font-bold py-1 px-2 rounded-full text-xs">Fit to Cell (Contain)</button>
+                     <button id="fill-cell-btn" class="bg-gray-200 hover:bg-gray-300 font-bold py-1 px-2 rounded-full text-xs">Fill Cell (Cover)</button>
                 </div>
             </div>
+        </aside>
 
-            <!-- Portrait Images Carousel -->
-            <div class="mb-4">
-                <div class="flex justify-between items-center mb-1">
-                    <div>
-                        <h3 class="text-sm font-medium text-pwint-cyan">Portrait Images</h3>
-                        <p class="text-xs text-gray-500">Images are grouped by scale. Click scale buttons to resize and regroup.</p>
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <!-- Header -->
+            <header class="flex-none bg-base-100 shadow-md z-20">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex items-center justify-between h-14">
+                        <div class="flex items-center">
+                            <button id="toggle-sidebar-btn" class="p-2 rounded-md hover:bg-gray-200 focus:outline-none">
+                               <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                            </button>
+                            <a href="index.html" class="flex items-center ml-4">
+                                <img src="pwint.png" alt="Pwint.ca" class="h-9">
+                                <span class="ml-2 text-xl font-bold pwint-gradient-text">Pwint™ Designer</span>
+                            </a>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button id="save-pdf-button" class="flex items-center bg-primary hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-full transition duration-300 text-sm">Save PDF</button>
+                            <button id="reset-button" class="hidden sm:flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-full transition duration-300 text-sm">Reset Canvas</button>
                     </div>
-                    <div class="flex space-x-1">
-                        <button class="select-all-btn text-xs bg-pwint-cyan hover:bg-cyan-700 text-white py-1 px-2 rounded" data-type="portrait" title="Select all portrait (vertical) images">
-                            Select All
-                        </button>
-                        <button class="unselect-all-btn text-xs bg-gray-600 hover:bg-gray-700 text-white py-1 px-2 rounded" data-type="portrait" title="Unselect all portrait (vertical) images">
-                            Unselect All
-                        </button>
                     </div>
                 </div>
-                <div id="portrait-carousel" class="overflow-x-auto py-2 border border-gray-200 rounded-md">
-                    <div id="portrait-container" class="inline-flex space-x-3 min-w-full">
-                        <!-- Portrait images will be inserted here -->
-                        <div class="text-center text-gray-400 italic py-12 px-12 border border-gray-200 rounded-md">
-                            No portrait images yet
+            </header>
+
+            <!-- Canvas Area -->
+            <main class="flex-1 p-4 flex items-center justify-center overflow-auto">
+                <div id="canvas-container" class="shadow-lg">
+                    <div class="canvas-wrapper">
+                        <canvas id="print-canvas"></canvas>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Image Library Footer -->
+            <footer class="flex-none bg-base-100 p-2 shadow-inner z-10 border-t-2 border-base-200">
+                <div class="flex items-center h-full max-h-[250px]">
+                    <!-- Drop Zone -->
+                    <div id="drop-zone" class="h-full w-48 flex-shrink-0 border-2 border-dashed border-secondary rounded-lg bg-base-200 hover:bg-base-300 transition text-center flex flex-col items-center justify-center p-2">
+                        <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <p class="mt-1 text-sm text-gray-600">Drop images or <label class="text-primary hover:underline cursor-pointer">browse<input type="file" id="file-input" multiple accept="image/*" class="hidden"></label></p>
+                    </div>
+                    <!-- Image Carousels -->
+                    <div class="flex-1 flex flex-col h-full overflow-hidden">
+                        <div class="flex-none flex items-center justify-between mb-1 px-2">
+                            <h2 class="text-lg font-bold pwint-gradient-text">Image Library</h2>
+                             <div class="flex items-center space-x-2">
+                                <button class="select-all-btn text-xs bg-primary hover:bg-opacity-80 text-white py-1 px-3 rounded-full" data-type="portrait">Select All Portrait</button>
+                                <button class="unselect-all-btn text-xs bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-full" data-type="portrait">Unselect All</button>
+                                <span class="border-l h-5"></span>
+                                <button class="select-all-btn text-xs bg-primary hover:bg-opacity-80 text-white py-1 px-3 rounded-full" data-type="landscape">Select All Landscape</button>
+                                <button class="unselect-all-btn text-xs bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-full" data-type="landscape">Unselect All</button>
+                    </div>
+                </div>
+                         <div class="flex-1 flex flex-row overflow-x-auto overflow-y-hidden pb-2">
+                            <div id="portrait-container" class="image-container"><div class="text-center w-full text-gray-400 italic p-4">No portrait images</div></div>
+                            <div class="border-l border-gray-300 h-full"></div>
+                            <div id="landscape-container" class="image-container"><div class="text-center w-full text-gray-400 italic p-4">No landscape images</div></div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Landscape Images Carousel -->
-            <div>
-                <div class="flex justify-between items-center mb-1">
-                    <div>
-                        <h3 class="text-sm font-medium text-pwint-cyan">Landscape Images</h3>
-                        <p class="text-xs text-gray-500">Images are grouped by scale. Click scale buttons to resize and regroup.</p>
-                    </div>
-                    <div class="flex space-x-1">
-                        <button class="select-all-btn text-xs bg-pwint-cyan hover:bg-cyan-700 text-white py-1 px-2 rounded" data-type="landscape" title="Select all landscape (horizontal) images">
-                            Select All
-                        </button>
-                        <button class="unselect-all-btn text-xs bg-gray-600 hover:bg-gray-700 text-white py-1 px-2 rounded" data-type="landscape" title="Unselect all landscape (horizontal) images">
-                            Unselect All
-                        </button>
-                    </div>
-                </div>
-                <div id="landscape-carousel" class="overflow-x-auto py-2 border border-gray-200 rounded-md">
-                    <div id="landscape-container" class="inline-flex space-x-3 min-w-full">
-                        <!-- Landscape images will be inserted here -->
-                        <div class="text-center text-gray-400 italic py-12 px-12 border border-gray-200 rounded-md">
-                            No landscape images yet
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </footer>
     </div>
-
     <div id="loading-indicator">Saving PDF...</div>
-
     </div>
-
-    <!-- Copyright footer -->
-    <div class="footer">
-        <p>2025 Pwint.ca. All rights reserved. Pwint® is a registered trademark.</p>
-        <p>This software and design are protected Shuper Duper Encripshion, don't steal it.</p>
-    </div>
-
-    <!-- Load our external JavaScript file -->
     <script src="print-designer.js"></script>
-    
-    <!-- Collapsible Tips Toggle Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const toggleBtn = document.getElementById('toggle-tips');
-            const tipsContent = document.getElementById('tips-content');
-            const toggleIcon = document.getElementById('toggle-icon');
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggle-sidebar-btn');
             
-            // Check if user preference is stored
-            const tipsCollapsed = localStorage.getItem('pwint_tips_collapsed') === 'true';
-            
-            // Apply initial state
-            if (tipsCollapsed) {
-                tipsContent.style.maxHeight = '0px';
-                toggleIcon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
-            } else {
-                tipsContent.style.maxHeight = tipsContent.scrollHeight + 'px';
-            }
-            
-            toggleBtn.addEventListener('click', function() {
-                if (tipsContent.style.maxHeight === '0px') {
-                    // Expand
-                    tipsContent.style.maxHeight = tipsContent.scrollHeight + 'px';
-                    toggleIcon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
-                    localStorage.setItem('pwint_tips_collapsed', 'false');
-                } else {
-                    // Collapse
-                    tipsContent.style.maxHeight = '0px';
-                    toggleIcon.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>';
-                    localStorage.setItem('pwint_tips_collapsed', 'true');
-                }
-            });
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('w-56');
+                sidebar.classList.toggle('w-0');
+                sidebar.classList.toggle('p-2');
+                sidebar.classList.toggle('p-0');
+                sidebar.classList.toggle('overflow-y-auto');
+                sidebar.classList.toggle('overflow-hidden');
+                 // Trigger a resize event for the canvas after the transition
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 300); // Match transition duration
+            };
+
+            toggleBtn.addEventListener('click', toggleSidebar);
         });
     </script>
 </body>

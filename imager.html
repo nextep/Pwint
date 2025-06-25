@@ -138,8 +138,13 @@
 <body class="font-sans">
     <div class="flex h-screen bg-base-200 overflow-hidden">
         <!-- Collapsible, Condensed Sidebar -->
-        <aside id="sidebar" class="w-56 bg-base-100 p-2 shadow-lg transition-all duration-300 ease-in-out flex flex-col space-y-2 overflow-y-auto">
-            <h1 class="text-md font-bold pwint-gradient-text text-center flex-none">Controls</h1>
+        <aside id="sidebar" class="bg-base-100 p-2 shadow-lg transition-all duration-300 ease-in-out flex flex-col space-y-2 overflow-y-auto w-0 md:w-56 md:p-2 p-0 overflow-hidden md:overflow-y-auto">
+            <div class="flex items-center justify-between flex-none">
+                <h1 class="text-md font-bold pwint-gradient-text text-center">Controls</h1>
+                <button id="close-sidebar-btn" class="p-2 rounded-md hover:bg-gray-200 focus:outline-none md:hidden">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
             
             <!-- Paper & Size Card -->
             <div class="bg-base-100 p-2 rounded-lg border">
@@ -238,22 +243,22 @@
 
             <!-- Image Library Footer -->
             <footer class="flex-none bg-base-100 p-2 shadow-inner z-10 border-t-2 border-base-200">
-                <div class="flex items-center h-full max-h-[250px]">
+                <div class="flex flex-col md:flex-row items-center h-full max-h-[450px] md:max-h-[250px]">
                     <!-- Drop Zone -->
-                    <div id="drop-zone" class="h-full w-48 flex-shrink-0 border-2 border-dashed border-secondary rounded-lg bg-base-200 hover:bg-base-300 transition text-center flex flex-col items-center justify-center p-2">
+                    <div id="drop-zone" class="h-48 md:h-full w-full md:w-48 flex-shrink-0 border-2 border-dashed border-secondary rounded-lg bg-base-200 hover:bg-base-300 transition text-center flex flex-col items-center justify-center p-2 mb-2 md:mb-0">
                         <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         <p class="mt-1 text-sm text-gray-600">Drop images or <label class="text-primary hover:underline cursor-pointer">browse<input type="file" id="file-input" multiple accept="image/*" class="hidden"></label></p>
                     </div>
                     <!-- Image Carousels -->
                     <div class="flex-1 flex flex-col h-full overflow-hidden">
-                        <div class="flex-none flex items-center justify-between mb-1 px-2">
-                            <h2 class="text-lg font-bold pwint-gradient-text">Image Library</h2>
-                             <div class="flex items-center space-x-2">
-                                <button class="select-all-btn text-xs bg-primary hover:bg-opacity-80 text-white py-1 px-3 rounded-full" data-type="portrait">Select All Portrait</button>
-                                <button class="unselect-all-btn text-xs bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-full" data-type="portrait">Unselect All</button>
-                                <span class="border-l h-5"></span>
-                                <button class="select-all-btn text-xs bg-primary hover:bg-opacity-80 text-white py-1 px-3 rounded-full" data-type="landscape">Select All Landscape</button>
-                                <button class="unselect-all-btn text-xs bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-full" data-type="landscape">Unselect All</button>
+                        <div class="flex-none flex flex-col sm:flex-row items-center justify-between mb-1 px-2">
+                            <h2 class="text-lg font-bold pwint-gradient-text mb-2 sm:mb-0">Image Library</h2>
+                             <div class="flex flex-wrap items-center justify-center space-x-2">
+                                <button class="select-all-btn text-xs bg-primary hover:bg-opacity-80 text-white py-1 px-3 rounded-full mb-1 sm:mb-0" data-type="portrait">Select All Portrait</button>
+                                <button class="unselect-all-btn text-xs bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-full mb-1 sm:mb-0" data-type="portrait">Unselect All</button>
+                                <span class="hidden sm:inline border-l h-5"></span>
+                                <button class="select-all-btn text-xs bg-primary hover:bg-opacity-80 text-white py-1 px-3 rounded-full mb-1 sm:mb-0" data-type="landscape">Select All Landscape</button>
+                                <button class="unselect-all-btn text-xs bg-gray-500 hover:bg-gray-600 text-white py-1 px-3 rounded-full mb-1 sm:mb-0" data-type="landscape">Unselect All</button>
                     </div>
                 </div>
                          <div class="flex-1 flex flex-row overflow-x-auto overflow-y-hidden pb-2">
@@ -272,14 +277,24 @@
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.getElementById('sidebar');
             const toggleBtn = document.getElementById('toggle-sidebar-btn');
+            const closeBtn = document.getElementById('close-sidebar-btn');
             
             const toggleSidebar = () => {
-                sidebar.classList.toggle('w-56');
-                sidebar.classList.toggle('w-0');
-                sidebar.classList.toggle('p-2');
-                sidebar.classList.toggle('p-0');
+                // On mobile, take up more screen width
+                if (window.innerWidth < 768) {
+                    sidebar.classList.toggle('w-0');
+                    sidebar.classList.toggle('w-10/12'); // Use a portion of the screen
+                    sidebar.classList.toggle('p-0');
+                    sidebar.classList.toggle('p-2');
+                } else {
+                    sidebar.classList.toggle('w-56');
+                    sidebar.classList.toggle('w-0');
+                    sidebar.classList.toggle('p-2');
+                    sidebar.classList.toggle('p-0');
+                }
                 sidebar.classList.toggle('overflow-y-auto');
                 sidebar.classList.toggle('overflow-hidden');
+
                  // Trigger a resize event for the canvas after the transition
                 setTimeout(() => {
                     window.dispatchEvent(new Event('resize'));
@@ -287,6 +302,7 @@
             };
 
             toggleBtn.addEventListener('click', toggleSidebar);
+            closeBtn.addEventListener('click', toggleSidebar);
         });
     </script>
 </body>

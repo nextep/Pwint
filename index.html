@@ -55,6 +55,38 @@
             font-size: 1.4em;
             font-weight: 600;
         }
+        .nav-toggle {
+            display: none;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            padding: 10px;
+            z-index: 1001;
+        }
+        .hamburger {
+            display: block;
+            position: relative;
+            width: 25px;
+            height: 3px;
+            background: var(--text-dark);
+            transition: all 0.2s ease-in-out;
+        }
+        .hamburger::before,
+        .hamburger::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 3px;
+            background: var(--text-dark);
+            left: 0;
+            transition: all 0.2s ease-in-out;
+        }
+        .hamburger::before {
+            top: -8px;
+        }
+        .hamburger::after {
+            bottom: -8px;
+        }
         .nav-links {
             display: flex;
             align-items: center;
@@ -372,6 +404,37 @@
         }
 
         @media (max-width: 768px) {
+            .nav-toggle {
+                display: block;
+            }
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 60%;
+                height: 100vh;
+                background-color: white;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 30px;
+                transition: right 0.3s ease-in-out;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            }
+            .nav-links.active {
+                right: 0;
+            }
+            .nav-open .hamburger {
+                background: transparent;
+            }
+            .nav-open .hamburger::before {
+                transform: rotate(45deg);
+                top: 0;
+            }
+            .nav-open .hamburger::after {
+                transform: rotate(-45deg);
+                bottom: 0;
+            }
             h1 {
                 font-size: 2.5em;
             }
@@ -406,7 +469,10 @@
             <img src="pwint.png" alt="Pwint.ca Home">
             <span class="logo-text pwint-gradient-text">Pwint</span>
         </a>
-        <div class="nav-links">
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <span class="hamburger"></span>
+        </button>
+        <div class="nav-links" id="nav-links">
             <a href="imager.html">Poster Designer</a>
             <a href="mosaic.html">Custom Mosaics</a>
             <a href="Ourwork.html">Our Work</a>
@@ -515,7 +581,7 @@
     <section class="mosaic-section">
         <div class="mosaic-container">
             <div class="mosaic-image">
-                <img src="samples/poster1.PNG" alt="Photo Mosaic Sample">
+                <img src="samples/Mosaic.jpg" alt="Photo Mosaic Sample">
             </div>
             <div class="mosaic-content">
                 <h2 class="mosaic-title">Custom Photo Mosaics</h2>
@@ -607,6 +673,14 @@
         // Initialize carousel when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             carousel.init();
+        });
+
+        // Hamburger menu functionality
+        const navToggle = document.querySelector('.nav-toggle');
+        const navLinks = document.getElementById('nav-links');
+        navToggle.addEventListener('click', () => {
+            document.body.classList.toggle('nav-open');
+            navLinks.classList.toggle('active');
         });
 
         // Add smooth scroll behavior

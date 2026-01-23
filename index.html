@@ -1,707 +1,545 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pwint.ca - Large Format Printing Specialists</title>
+    <title>Pwint | Custom Mosaics & Immersive Large Format</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Bricolage+Grotesque:wght@800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --cyan: #00bcd4;
-            --magenta: #e91e63;
-            --yellow: #cc9900;
-            --black: #212121;
-            --gradient-primary: linear-gradient(135deg, #00bcd4, #e91e63, #cc9900);
-            --text-dark: #212121;
-            --text-gray: #555555;
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fffdf5; }
+        .font-display { font-family: 'Bricolage Grotesque', sans-serif; }
+        
+        .target-drift { 
+            animation: slow-drift 15s ease-in-out infinite;
+        }
+        
+        @keyframes slow-drift {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(12px, -8px); }
+            50% { transform: translate(-6px, 14px); }
+            75% { transform: translate(-10px, -4px); }
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-
-        body {
-            background-color: #ffffff;
-            color: var(--text-dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* New Navigation Styles */
-        .main-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 30px;
-            background-color: #fff;
-            border-bottom: 1px solid #eee;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-        }
-        .nav-logo img {
-            max-width: 120px;
-            height: auto;
-        }
-        .logo-text {
-            font-size: 1.4em;
-            font-weight: 600;
-        }
-        .nav-toggle {
-            display: none;
-            cursor: pointer;
-            border: none;
-            background: transparent;
-            padding: 10px;
-            z-index: 1001;
-        }
-        .hamburger {
-            display: block;
-            position: relative;
-            width: 25px;
-            height: 3px;
-            background: var(--text-dark);
-            transition: all 0.2s ease-in-out;
-        }
-        .hamburger::before,
-        .hamburger::after {
-            content: '';
+        .ink-blob {
             position: absolute;
-            width: 25px;
-            height: 3px;
-            background: var(--text-dark);
-            left: 0;
-            transition: all 0.2s ease-in-out;
+            filter: blur(120px);
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
         }
-        .hamburger::before {
-            top: -8px;
-        }
-        .hamburger::after {
-            bottom: -8px;
-        }
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-gray);
-            font-weight: 500;
-            font-size: 1.05em;
-            position: relative;
-            padding: 5px 2px;
-            transition: color 0.3s ease;
-        }
-        .nav-links a:hover {
-            color: var(--text-dark);
-        }
-        .nav-links a:not(.nav-cta)::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--gradient-primary);
-            transition: width 0.3s ease;
-        }
-        .nav-links a:not(.nav-cta):hover::after {
-            width: 100%;
+        .blob-cyan { background: #00aeef; width: 600px; height: 600px; top: -200px; left: -100px; }
+        .blob-magenta { background: #ec008c; width: 650px; height: 650px; bottom: -100px; right: -50px; }
+        .blob-yellow { background: #fff200; width: 450px; height: 450px; top: 35%; left: 25%; }
+
+        .pop-shadow { box-shadow: 12px 12px 0px 0px #1a1a1a; }
+        .pop-shadow-teal { box-shadow: 12px 12px 0px 0px #0d9488; }
+        .pop-shadow-coral { box-shadow: 12px 12px 0px 0px #f43f5e; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(26, 26, 26, 0.05);
         }
 
-        .main-header {
-            text-align: center;
-            padding: 50px 20px;
+        .calc-input {
+            background: #fffdf5;
+            border: 2px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 12px;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.2s;
         }
-        .main-header h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .pwint-gradient-text {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .main-header h2 {
-            font-size: 1.5em;
-            color: var(--text-gray);
-            font-weight: normal;
-        }
-
-        .cta-button, .nav-cta {
-            padding: 10px 22px;
-            font-size: 1.05em;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
-            background: var(--gradient-primary);
-            color: white !important; /* important to override link styles */
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            margin: 5px;
-        }
-
-        .cta-button:hover, .nav-cta:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .cta-section {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: #ffffff;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            padding: 40px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #ffffff;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            border: 1px solid #eee;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .feature-card p {
-            color: var(--text-gray);
-        }
-
-        .feature-icon {
-            font-size: 3em;
-            margin-bottom: 20px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .price-highlight {
-            color: var(--magenta);
-            font-weight: bold;
-        }
-
-        /* Carousel Styles */
-        .carousel-section {
-            padding: 60px 20px;
-            padding-top: 0; /* No top padding as it's at the top */
-            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
-        }
-
-        .carousel-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .carousel-title {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .carousel-subtitle {
-            font-size: 1.2em;
-            color: var(--text-gray);
-            margin-bottom: 40px;
-        }
-
-        .carousel-wrapper {
-            position: relative;
-            overflow: hidden;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .carousel-inner {
-            display: flex;
-            transition: transform 0.5s ease;
-        }
-
-        .carousel-item {
-            min-width: 100%;
+        .calc-input:focus { border-color: #f43f5e; box-shadow: 4px 4px 0px 0px #f43f5e; }
+        
+        .preview-box {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #1a1a1a;
             position: relative;
         }
 
-        .carousel-item img {
-            width: 100%;
-            height: 500px;
-            object-fit: cover;
-        }
-
-        .carousel-caption {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            color: white;
-            padding: 30px;
-            text-align: left;
-        }
-
-        .carousel-caption h3 {
-            font-size: 1.8em;
-            margin-bottom: 10px;
-        }
-
-        .carousel-caption p {
-            font-size: 1.1em;
-            color: #ffffff;
-        }
-
-        .carousel-controls {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fffdf5; }
+        ::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; }
 
         .carousel-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
         }
-
-        .carousel-btn:hover {
-            background: white;
-            transform: scale(1.1);
-        }
-
-        .carousel-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: var(--magenta);
-        }
-
-        .carousel-indicators {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ddd;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .indicator.active {
-            background: var(--magenta);
-            transform: scale(1.3);
-        }
-
-        .location {
-            text-align: center;
-            padding: 40px 20px;
-            background: #ffffff;
-        }
-
-        .location h2 {
-            color: var(--cyan);
-            margin-bottom: 15px;
-        }
-
-        .location p {
-            color: var(--text-gray);
-            margin-bottom: 20px;
-        }
-
-        /* Mosaic Section Styles */
-        .mosaic-section {
-            padding: 60px 20px;
-            background-color: #f8f9fa;
-        }
-        .mosaic-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            gap: 40px;
-        }
-        .mosaic-image {
-            flex: 1;
-        }
-        .mosaic-image img {
-            width: 100%;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .mosaic-content {
-            flex: 1;
-            text-align: left;
-        }
-        .mosaic-title {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .mosaic-description {
-            font-size: 1.2em;
-            color: var(--text-gray);
-            margin-bottom: 30px;
-        }
-
-        @keyframes titleAnimation {
-            from {
-                filter: hue-rotate(0deg);
-            }
-            to {
-                filter: hue-rotate(90deg);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-toggle {
-                display: block;
-            }
-            .nav-links {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 60%;
-                height: 100vh;
-                background-color: white;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                gap: 30px;
-                transition: right 0.3s ease-in-out;
-                box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-            }
-            .nav-links.active {
-                right: 0;
-            }
-            .nav-open .hamburger {
-                background: transparent;
-            }
-            .nav-open .hamburger::before {
-                transform: rotate(45deg);
-                top: 0;
-            }
-            .nav-open .hamburger::after {
-                transform: rotate(-45deg);
-                bottom: 0;
-            }
-            h1 {
-                font-size: 2.5em;
-            }
-            .subtitle {
-                font-size: 1.2em;
-            }
-            .features {
-                grid-template-columns: 1fr;
-            }
-            .carousel-item img {
-                height: 300px;
-            }
-            .carousel-title {
-                font-size: 2em;
-            }
-            .mosaic-container {
-                flex-direction: column;
-            }
-            .mosaic-content {
-                text-align: center;
-            }
-            .main-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-        }
+        .carousel-btn:hover { background: #f43f5e; color: white; border-color: #f43f5e; transform: scale(1.1); }
     </style>
 </head>
-<body>
-    <header class="main-nav">
-        <a href="index.html" class="nav-logo">
-            <img src="pwint.png" alt="Pwint.ca Home">
-            <span class="logo-text pwint-gradient-text">Pwint</span>
-        </a>
-        <button class="nav-toggle" aria-label="toggle navigation">
-            <span class="hamburger"></span>
-        </button>
-        <div class="nav-links" id="nav-links">
-            <a href="imager.html">Poster Designer</a>
-            <a href="mosaic.html">Custom Mosaics</a>
-            <a href="Ourwork.html">Our Work</a>
-            <a href="mailto:info@pwint.ca?subject=Quote%20Request" class="nav-cta">Get a Quote</a>
-        </div>
-    </header>
+<body class="text-[#1a1a1a] overflow-x-hidden text-left">
 
-    <!-- Quality Showcase Carousel -->
-    <section class="carousel-section">
-        <div class="carousel-container">
-            <h2 class="carousel-title">Experience Pwint Quality</h2>
-            <p class="carousel-subtitle">See the stunning results our customers love</p>
+    <div class="ink-blob blob-cyan animate-pulse"></div>
+    <div class="ink-blob blob-magenta"></div>
+    <div class="ink-blob blob-yellow"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 px-6 py-6 text-left">
+        <div class="max-w-7xl mx-auto flex justify-between items-center bg-white/40 backdrop-blur-xl border border-black/5 rounded-3xl px-8 py-4 shadow-sm">
+            <div class="flex items-center gap-4 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                <svg viewBox="0 0 100 100" class="w-12 h-12 text-[#1a1a1a]" fill="none">
+                    <circle cx="50" cy="50" r="18" stroke="currentColor" stroke-width="5" />
+                    <line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="1.5" />
+                    <line x1="5" y1="50" x2="95" y2="50" stroke="currentColor" stroke-width="1.5" />
+                    <g class="target-drift">
+                        <circle cx="50" cy="50" r="38" stroke="#f43f5e" stroke-width="2" stroke-dasharray="4 8" />
+                        <rect x="45" y="45" width="10" height="10" fill="#f43f5e" rx="1" />
+                    </g>
+                </svg>
+                <div class="flex flex-col text-left">
+                    <span class="text-3xl font-display tracking-tighter leading-none uppercase">PWINT<span class="text-[#f43f5e]">.</span></span>
+                    <span class="text-[8px] font-bold uppercase tracking-[0.4em] text-[#0d9488]">Premium Large Format Printing</span>
+                </div>
+            </div>
             
-            <div class="carousel-wrapper">
-                <div class="carousel-inner" id="carouselInner">
-                    <div class="carousel-item">
-                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=500&fit=crop" alt="High quality map print">
-                        <div class="carousel-caption">
-                            <h3>Crystal Clear Maps</h3>
-                            <p>Every detail matters. Our 42" premium prints showcase maps with incredible precision.</p>
+            <div class="hidden md:flex gap-10 items-center text-[10px] font-bold uppercase tracking-widest text-[#5c5c5c]">
+                <a href="#specialties" class="hover:text-[#f43f5e] transition-colors">Services</a>
+                <a href="#scale-lab" class="hover:text-[#f43f5e] transition-colors">Scale Lab</a>
+                <a href="#showcase" class="hover:text-[#f43f5e] transition-colors">Showcase</a>
+                <a href="#rates" class="hover:text-[#f43f5e] transition-colors">Rates</a>
+                <a href="tel:6135138457" class="bg-[#1a1a1a] text-white px-6 py-3 rounded-full hover:bg-[#f43f5e] transition-all shadow-lg flex items-center gap-2">
+                    <i data-lucide="phone" class="w-3 h-3 text-left"></i> 613-513-8457
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="relative pt-48 pb-24 px-6 max-w-7xl mx-auto z-10 text-left">
+        <div class="grid lg:grid-cols-5 gap-16 items-center">
+            <div class="lg:col-span-3">
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-[#0d9488]/10 text-[#0d9488] text-[10px] font-bold uppercase tracking-widest mb-8 rounded-full border border-[#0d9488]/20">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0d9488] opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-[#0d9488]"></span>
+                    </span>
+                    Home-Based Professional Studio
+                </div>
+                <h1 class="text-7xl md:text-[8.5rem] font-display tracking-tighter leading-[0.8] mb-12 text-[#1a1a1a]">
+                    SCALE. <br/> <span class="text-[#f43f5e] italic text-8xl md:text-[7.5rem]">VIVID COLOR.</span> <br/> IMPACT.
+                </h1>
+                <p class="text-xl md:text-2xl text-[#4b5563] max-w-xl leading-relaxed mb-12 font-medium">
+                    Grand-scale mosaics, residue-free fabric media door portals, and high-fidelity photo posters. I check every file for resolution and aspect ratio personally—open when other shops are closed.
+                </p>
+                <div class="flex flex-wrap gap-8 items-center text-left">
+                    <a href="#rates" class="bg-[#1a1a1a] text-white px-12 py-6 rounded-3xl font-bold text-xl pop-shadow-teal hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all uppercase tracking-tight">
+                        Check My Rates
+                    </a>
+                    <div class="flex items-center gap-4 px-6 border-l-2 border-black/10">
+                        <i data-lucide="clock" class="text-[#f43f5e] w-8 h-8"></i>
+                        <div class="text-[10px] font-black uppercase tracking-widest leading-tight">
+                            Available Evenings <br/> & Full Weekends
                         </div>
                     </div>
-                    <div class="carousel-item">
-                        <img src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=1200&h=500&fit=crop" alt="Vibrant photo print">
-                        <div class="carousel-caption">
-                            <h3>Vibrant Photo Prints</h3>
-                            <p>Colors that pop! Our photo prints bring your memories to life in stunning detail.</p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 relative">
+                <div class="p-6 bg-white border-2 border-black pop-shadow-coral rounded-[4rem] rotate-2 overflow-hidden text-left">
+                    <div class="aspect-square bg-white rounded-[3rem] flex flex-col items-center justify-center p-1 relative overflow-hidden group">
+                        <img src="images/hero-machine.jpg" alt="Hero Machine" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:opacity-40 transition-opacity">
+                        <div class="relative z-10 text-left p-12">
+                            <i data-lucide="scan" class="w-16 h-16 mb-6 text-[#f43f5e] group-hover:scale-110 transition-transform duration-700"></i>
+                            <h3 class="text-3xl font-display leading-none mb-4 uppercase text-[#1a1a1a]">"Not a print shop."</h3>
+                            <p class="text-[#5c5c5c] text-sm leading-relaxed max-w-xs font-medium">
+                                I provide advice and high-spec substrates retail counters don't carry. If it’s going to pixelate, I'll tell you before I print.
+                            </p>
+                        </div>
+                        <div class="absolute -bottom-10 -right-10 text-[10rem] font-display italic text-black/5 select-none">42"</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Capabilities Section -->
+    <section id="specialties" class="py-32 px-6 max-w-7xl mx-auto z-10 relative border-t border-black/5 text-left">
+        <div class="mb-24 flex flex-col md:flex-row justify-between items-end gap-8 text-left">
+            <div class="max-w-xl">
+                <h2 class="text-5xl font-display tracking-tight uppercase leading-none text-[#1a1a1a] mb-6">The Full <br/> <span class="text-[#0d9488]">Manifest.</span></h2>
+                <p class="text-lg font-medium text-[#4b5563]">Specialized sensational output for photographers, painters, renters, and professionals. 1-Hour turnaround speed.</p>
+            </div>
+            <div class="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.5em] text-[#f43f5e]">
+                <i data-lucide="sparkles" class="w-4 h-4"></i> No Pigeonholes
+            </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <!-- Cards -->
+            <div class="glass-card p-12 rounded-[4rem] group hover:bg-white transition-all duration-500 border-2 border-transparent hover:border-[#1a1a1a] hover:pop-shadow text-left overflow-hidden">
+                <div class="w-16 h-16 bg-[#fbbf24]/10 text-[#d97706] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform"><i data-lucide="layers"></i></div>
+                <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none">Custom Mosaics</h3>
+                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium">Visual impact designs woven into massive, high-res physical statements for any room.</p>
+                <div class="text-[10px] font-black uppercase tracking-widest text-yellow-600">$250-$500 / Project Files + Print</div>
+            </div>
+
+            <div class="bg-[#1a1a1a] p-12 rounded-[4rem] text-white group hover:scale-[1.02] transition-all duration-500 shadow-2xl relative overflow-hidden text-left">
+                <div class="w-16 h-16 bg-white/10 text-[#f43f5e] rounded-3xl flex items-center justify-center mb-10 text-left"><i data-lucide="door-open"></i></div>
+                <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-white">Simulated Portals</h3>
+                <p class="text-sm leading-relaxed text-gray-400 mb-8 font-medium text-left">36" woven adhesive fabric. Sticks perfectly, removes with zero residue.</p>
+                <div class="text-[10px] font-black uppercase tracking-widest text-[#f43f5e]">$150 Fixed Rate</div>
+            </div>
+
+            <div class="glass-card p-12 rounded-[4rem] group hover:bg-white transition-all duration-500 border-2 border-transparent hover:border-[#1a1a1a] hover:pop-shadow text-left overflow-hidden">
+                <div class="w-16 h-16 bg-[#0d9488]/10 text-[#0d9488] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left text-left text-left"><i data-lucide="video"></i></div>
+                <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-left">Studio Backdrops</h3>
+                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium text-left">Large custom 42" tall backdrops for video chat. Specialized non-reflective media.</p>
+                <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#0d9488]">
+                    <span class="w-2 h-2 rounded-full bg-[#0d9488]"></span> $200 Fixed Rate
+                </div>
+            </div>
+
+            <div class="glass-card p-12 rounded-[4rem] group hover:bg-white transition-all duration-500 border-2 border-transparent hover:border-[#1a1a1a] hover:pop-shadow text-left overflow-hidden">
+                <div class="w-16 h-16 bg-[#6366f1]/10 text-[#6366f1] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left text-left text-left text-left"><i data-lucide="camera"></i></div>
+                <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-left text-left">Photo Posters</h3>
+                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium font-medium text-left">Museum-quality photo paper up to 24" wide. Genuine HP pigment inks.</p>
+                <div class="text-[10px] font-black uppercase tracking-widest text-[#6366f1]">$50 for 24x18"</div>
+            </div>
+
+            <div class="glass-card p-12 rounded-[4rem] group hover:bg-white transition-all duration-500 border-2 border-transparent hover:border-[#1a1a1a] hover:pop-shadow text-left overflow-hidden">
+                <div class="w-16 h-16 bg-[#f43f5e]/10 text-[#f43f5e] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left text-left text-left text-left text-left"><i data-lucide="maximize"></i></div>
+                <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-left text-left">Heavyweight Posters</h3>
+                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium text-left text-left">Up to 42" wide commercial-grade prints for advertising and displays.</p>
+                <div class="text-[10px] font-black uppercase tracking-widest text-[#f43f5e]">Best for Bulk</div>
+            </div>
+
+            <div class="bg-[#f5e6d3] p-12 rounded-[4rem] group border-2 border-transparent hover:border-black hover:pop-shadow transition-all text-left">
+                <div class="w-16 h-16 bg-white text-[#0d9488] rounded-3xl flex items-center justify-center mb-10 text-left text-left text-left text-left text-left text-left"><i data-lucide="file-text"></i></div>
+                <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-[#1a1a1a] text-left">Laser Docs</h3>
+                <p class="text-sm leading-relaxed text-[#5c5852] mb-8 font-medium italic text-left">Vibrant A4 output. $0.75 per page. $10 minimum. <span class="font-bold underline text-[#1a1a1a] text-left">Min. order waived with prints.</span></p>
+                <div class="text-[10px] font-black uppercase tracking-widest text-black/40">High Volume Ready</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scale Lab -->
+    <section id="scale-lab" class="py-32 px-6 max-w-7xl mx-auto z-10 relative text-left">
+        <div class="p-12 md:p-20 bg-white border-2 border-black pop-shadow rounded-[5rem] overflow-hidden relative text-left">
+            <div class="grid lg:grid-cols-2 gap-20 items-start text-left">
+                <div class="text-left relative z-10">
+                    <div class="inline-block px-3 py-1 bg-[#0d9488] text-white text-[9px] font-bold uppercase tracking-widest mb-6 rounded-full text-left">Pro Tool</div>
+                    <h2 class="text-5xl font-display tracking-tight uppercase leading-none text-[#1a1a1a] mb-6">Scale <br/><span class="text-[#f43f5e]">Calculator.</span></h2>
+                    <p class="text-lg font-medium text-[#4b5563] mb-12 italic text-left">Check how your file fits our rolls. Fit to Width or Height (Tall).</p>
+                    
+                    <div class="space-y-8 text-left text-left">
+                        <div class="text-left">
+                            <label class="text-[10px] font-black uppercase tracking-widest mb-3 block text-gray-400">Step 1: Choose Roll Width</label>
+                            <div class="flex gap-4">
+                                <button onclick="setRollWidth(24)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all hover:bg-black hover:text-white" id="btn-24">24"</button>
+                                <button onclick="setRollWidth(36)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all bg-black text-white" id="btn-36">36"</button>
+                                <button onclick="setRollWidth(42)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all hover:bg-black hover:text-white" id="btn-42">42"</button>
+                            </div>
+                        </div>
+
+                        <div class="text-left">
+                            <label class="text-[10px] font-black uppercase tracking-widest mb-3 block text-gray-400">Step 2: Constrain Side</label>
+                            <div class="flex gap-4 text-left">
+                                <button onclick="setConstraint('width')" class="constrain-btn px-4 py-2 rounded-lg border-2 border-black font-bold text-sm bg-black text-white text-left" id="btn-constrain-width">Fit to Width</button>
+                                <button onclick="setConstraint('height')" class="constrain-btn px-4 py-2 rounded-lg border-2 border-black font-bold text-sm transition-all hover:bg-black hover:text-white text-left" id="btn-constrain-height">Fit to Height (Tall)</button>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-8 text-left text-left">
+                            <label class="flex items-center gap-2 cursor-pointer font-bold">
+                                <input type="radio" name="method" value="ratio" checked onchange="toggleMethod('ratio')" class="accent-[#f43f5e] w-4 h-4"> Aspect Ratio
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer font-bold">
+                                <input type="radio" name="method" value="pixels" onchange="toggleMethod('pixels')" class="accent-[#f43f5e] w-4 h-4 text-left"> Pixels
+                            </label>
+                        </div>
+
+                        <div id="ratio-inputs" class="flex gap-4 items-center text-left">
+                            <input type="number" id="ratio-w" class="calc-input w-full" value="16" oninput="calculateScale()">
+                            <span class="font-black text-2xl">:</span>
+                            <input type="number" id="ratio-h" class="calc-input w-full text-left" value="9" oninput="calculateScale()">
+                        </div>
+
+                        <div id="pixel-inputs" class="hidden flex gap-4 items-center text-left">
+                            <input type="number" id="pixel-w" class="calc-input w-full text-left" value="3000" oninput="calculateScale()">
+                            <span class="font-black text-xl text-gray-300">x</span>
+                            <input type="number" id="pixel-h" class="calc-input w-full text-left" value="2000" oninput="calculateScale()">
                         </div>
                     </div>
-                    <div class="carousel-item">
-                        <img src="samples/Mosaic.jpg" alt="Custom photo mosaic">
-                        <div class="carousel-caption">
-                            <h3>Custom Photo Mosaics</h3>
-                            <p>Turn thousands of your favorite photos into a single, stunning piece of art. <a href="mosaic.html" style="color:white; text-decoration:underline;">Learn More</a>.</p>
+                </div>
+
+                <div class="relative flex flex-col items-center justify-center h-full min-h-[400px]">
+                    <div class="text-left w-full mb-12">
+                        <div class="text-[10px] font-black uppercase tracking-widest text-[#0d9488] mb-2 text-left">Calculated Size</div>
+                        <div id="result-text" class="text-6xl font-display tracking-tighter italic text-[#1a1a1a] text-left">36" x 20.2"</div>
+                    </div>
+                    <div class="w-full h-[300px] bg-black/5 rounded-3xl border-2 border-dashed border-black/10 flex items-center justify-center p-8 relative overflow-hidden">
+                        <div id="preview-frame" class="preview-box border-2 border-black pop-shadow-coral flex items-center justify-center overflow-hidden">
+                            <div class="text-[10px] font-black text-white/20 uppercase tracking-widest" id="orientation-label">Landscape</div>
                         </div>
                     </div>
-                    <div class="carousel-item">
-                        <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1200&h=500&fit=crop" alt="Art print showcase">
-                        <div class="carousel-caption">
-                            <h3>Museum-Quality Art Prints</h3>
-                            <p>Gallery-worthy prints that transform any space. Available in multiple sizes and finishes.</p>
-                        </div>
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://images.unsplash.com/photo-1554080353-a576cf803bda?w=1200&h=500&fit=crop" alt="Professional poster">
-                        <div class="carousel-caption">
-                            <h3>Professional Posters</h3>
-                            <p>From business presentations to event promotions, we deliver impact at any scale.</p>
-                        </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Showcase Gallery -->
+    <section id="showcase" class="py-32 px-6 max-w-7xl mx-auto z-10 relative text-left">
+        <div class="mb-20 flex flex-col md:flex-row justify-between items-end gap-8 text-left">
+            <div class="max-w-xl">
+                <h2 class="text-5xl font-display tracking-tight uppercase leading-none text-[#1a1a1a] mb-6 italic">The Showcase.</h2>
+                <p class="text-lg font-medium text-[#4b5563] italic border-l-4 border-[#0d9488] pl-8">Vibrant previews hosted on-site. Click to explore.</p>
+            </div>
+        </div>
+        <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Dynamic Injection -->
+        </div>
+    </section>
+
+    <!-- Rates Section -->
+    <section id="rates" class="py-32 px-6 max-w-5xl mx-auto z-10 relative text-left text-left">
+        <div class="text-center mb-24 text-left">
+            <h2 class="text-6xl font-display tracking-tight uppercase mb-6 leading-none italic text-left">Rate Manifest.</h2>
+            <p class="text-xl font-medium text-[#4b5563] text-left">Linear-foot calculation for specialized media. Fair & Transparent.</p>
+        </div>
+
+        <div class="bg-white rounded-[4rem] border-2 border-black pop-shadow overflow-hidden">
+            <div class="overflow-x-auto text-left">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-black/5 border-b border-black/10 text-left">
+                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c]">Substrate</th>
+                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c]">Roll Width</th>
+                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c]">Best Use</th>
+                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-right">Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-black/5 hover:bg-black/5 transition-colors">
+                            <td class="p-10 font-display text-2xl leading-none">Self-Adhesive Woven Fabric</td>
+                            <td class="p-10 font-black">36" Width</td>
+                            <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40">Portals, Mosaics, Murals</td>
+                            <td class="p-10 text-right font-display text-3xl text-[#f43f5e] italic tracking-tighter whitespace-nowrap">$50 / ft</td>
+                        </tr>
+                        <tr class="border-b border-black/5 hover:bg-black/5 transition-colors">
+                            <td class="p-10 font-display text-2xl leading-none uppercase tracking-tighter text-left">Heavy-Weight Media</td>
+                            <td class="p-10 font-black">42" Width</td>
+                            <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40 text-left">Display Posters, Plans</td>
+                            <td class="p-10 text-right font-display text-3xl text-[#0d9488] italic tracking-tighter">$30 / ft</td>
+                        </tr>
+                        <tr class="border-b border-black/5 hover:bg-black/5 transition-colors">
+                            <td class="p-10 font-display text-2xl leading-none uppercase tracking-tighter text-left">Professional Photo</td>
+                            <td class="p-10 font-black text-left">24" Width</td>
+                            <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40 text-left">Art Grade Photo Prints</td>
+                            <td class="p-10 text-right font-display text-3xl text-black italic tracking-tighter">$30 / ft</td>
+                        </tr>
+                        <tr class="hover:bg-black/5 transition-colors text-left">
+                            <td class="p-10 text-left">
+                                <div class="font-display text-2xl leading-none">Laser Color Document</div>
+                                <div class="text-[9px] uppercase tracking-widest text-[#f43f5e] mt-2 font-black underline decoration-2">Min. order waived with prints</div>
+                            </td>
+                            <td class="p-10 font-black">A4 Size</td>
+                            <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40">Color Reports ($10 Min)</td>
+                            <td class="p-10 text-right font-display text-3xl text-black italic tracking-tighter">$0.75 / pg</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact" class="pt-40 pb-20 px-6 max-w-7xl mx-auto text-left border-t border-black/10">
+        <div class="grid lg:grid-cols-2 gap-40 text-left">
+            <div class="text-left">
+                <div class="flex items-center gap-6 mb-16">
+                    <svg viewBox="0 0 100 100" class="w-24 h-24 text-[#1a1a1a]" fill="none">
+                        <circle cx="50" cy="50" r="18" stroke="currentColor" stroke-width="5" />
+                        <line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="1.5" />
+                        <line x1="5" y1="50" x2="95" y2="50" stroke="currentColor" stroke-width="1.5" />
+                        <g class="target-drift">
+                            <circle cx="50" cy="50" r="38" stroke="#f43f5e" stroke-width="2" stroke-dasharray="4 8" />
+                            <rect x="45" y="45" width="10" height="10" fill="#f43f5e" rx="1" />
+                        </g>
+                    </svg>
+                    <div class="flex flex-col text-left">
+                        <h3 class="text-7xl font-display tracking-tighter uppercase leading-none">PWINT<span class="text-[#f43f5e]">.</span></h3>
+                        <span class="text-[10px] font-black uppercase text-[#0d9488] mt-2 text-left text-left">Professional Output Studio</span>
                     </div>
                 </div>
                 
-                <div class="carousel-controls">
-                    <button class="carousel-btn" id="prevBtn">
-                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-                    </button>
-                    <button class="carousel-btn" id="nextBtn">
-                        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-                    </button>
+                <div class="space-y-16 text-left">
+                    <div class="grid grid-cols-2 gap-12 text-left text-left text-left text-left text-left">
+                        <div>
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-[#f43f5e] mb-4">Availability</span>
+                            <span class="text-4xl font-display italic">Mon-Fri 6-10 PM</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-[#f43f5e] mb-4">Weekends</span>
+                            <span class="text-4xl font-display italic">Sat-Sun 9-9</span>
+                        </div>
+                    </div>
+                    <p class="text-[#5c5c5c] italic text-xl border-l-4 border-[#0d9488] pl-10 leading-relaxed max-w-sm text-left">"Built for scale, delivered with precision."</p>
                 </div>
             </div>
-            
-            <div class="carousel-indicators" id="indicators"></div>
-        </div>
-    </section>
 
-    <section class="cta-section">
-        <div class="cta-buttons">
-            <button class="cta-button" onclick="location.href='imager.html'">Create your poster now</button>
-            <button class="cta-button" onclick="location.href='mosaic.html'">Custom Mosaic</button>
-            <button class="cta-button" onclick="location.href='mailto:info@pwint.ca?subject=Quote%20Request%20-%20Large%20Format%20Printing'">Get a Quote</button>
-        </div>
-    </section>
-
-    <div class="features">
-        <div class="feature-card">
-            <div class="feature-icon">🗺️</div>
-            <h3 style="color: var(--cyan)">Premium Maps</h3>
-            <p>High-quality maps printed on</p>
-            <p class="price-highlight">42" Premium Paper</p>
-            <p>Perfect for office decor or planning</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">📸</div>
-            <h3 style="color: var(--magenta)">Photo Posters</h3>
-            <p>Professional photo printing on</p>
-            <p class="price-highlight">24" Photo Paper</p>
-            <p>Available in Gloss or Matte finish</p>
-        </div>
-        <div class="feature-card" onclick="location.href='mosaic.html'" style="cursor: pointer;">
-            <div class="feature-icon">🎨</div>
-            <h3 style="color: var(--yellow)">Custom Mosaics</h3>
-            <p>Create a stunning poster from hundreds of your favorite photos.</p>
-            <p class="price-highlight">Unique & Personal</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">✨</div>
-            <h3 style="color: var(--cyan)">And More!</h3>
-            <p>Tailored to your needs</p>
-            <p>Professional quality</p>
-            <p>Fast turnaround time</p>
-        </div>
-    </div>
-
-    <!-- Mosaic Showcase Section -->
-    <section class="mosaic-section">
-        <div class="mosaic-container">
-            <div class="mosaic-image">
-                <img src="samples/Mosaic.jpg" alt="Photo Mosaic Sample">
-            </div>
-            <div class="mosaic-content">
-                <h2 class="mosaic-title">Custom Photo Mosaics</h2>
-                <p class="mosaic-description">Provide us with a main picture and hundreds (or thousands) of your other photos, and we will create a stunning, high-resolution mosaic. This is a custom service currently offered offline. Contact us to learn more!</p>
-                <button class="cta-button" onclick="location.href='mailto:info@pwint.ca?subject=Inquiry%20about%20Custom%20Photo%20Mosaic'">Inquire About Mosaics</button>
+            <div class="bg-white p-12 md:p-24 rounded-[6rem] border-2 border-black pop-shadow-coral relative group text-left">
+                <h3 class="text-6xl font-display tracking-tighter uppercase italic mb-12 leading-none text-left">Ready to <br/> project?</h3>
+                <div class="space-y-12 relative z-10 text-left">
+                    <a href="tel:6135138457" class="flex items-center gap-8 group/link">
+                        <div class="w-16 h-16 rounded-3xl bg-[#1a1a1a] text-white flex items-center justify-center group-hover:bg-[#f43f5e] transition-all"><i data-lucide="phone" class="w-8 h-8"></i></div>
+                        <div class="flex flex-col text-left">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-[#5c5c5c]">Call / Text</span>
+                            <span class="font-display text-5xl tracking-tighter italic">613-513-8457</span>
+                        </div>
+                    </a>
+                    <div class="flex items-center gap-8 text-left text-left">
+                        <div class="w-16 h-16 rounded-3xl bg-[#1a1a1a] text-white flex items-center justify-center"><i data-lucide="mail" class="w-8 h-8"></i></div>
+                        <div class="flex flex-col">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-[#5c5c5c]">Email</span>
+                            <span class="font-display text-5xl tracking-tighter italic">info@pwint.ca</span>
+                        </div>
+                    </div>
+                    <a href="https://www.facebook.com/profile.php?id=61552493924266&sk=about" target="_blank" class="w-full bg-[#1a1a1a] text-white py-8 rounded-[3rem] font-bold text-2xl hover:bg-[#0d9488] transition-all shadow-2xl uppercase text-center block text-left">
+                        Facebook Studio
+                    </a>
+                </div>
             </div>
         </div>
-    </section>
+    </footer>
 
-    <div class="location">
-        <h2>Serving the Ottawa Area</h2>
-        <p>Professional large format printing services in the heart of Ottawa</p>
-        <button class="cta-button" style="margin-top: 20px;" onclick="location.href='mailto:info@pwint.ca?subject=Contact%20Request%20-%20Large%20Format%20Printing'">Contact Us</button>
-    </div>
-
-    <!-- Copyright and Trademark Footer -->
-    <div style="text-align: center; padding: 20px; margin-top: 30px; border-top: 1px solid #eee; color: #777; font-size: 0.8rem;">
-        <p>2025 Pwint.ca. All rights reserved. Pwint® is a registered trademark.</p>
+    <!-- Carousel Modal -->
+    <div id="carousel-modal" class="fixed inset-0 z-[100] bg-black/98 backdrop-blur-2xl hidden flex items-center justify-center p-6 md:p-12 text-left text-left">
+        <button onclick="closeCarousel()" class="absolute top-8 right-8 z-[110] text-white/50 hover:text-white transition-colors"><i data-lucide="x" class="w-10 h-10"></i></button>
+        <button onclick="prevSlide()" class="absolute left-6 z-[110] p-4 rounded-full carousel-btn text-white/50 hover:text-white"><i data-lucide="chevron-left" class="w-10 h-10"></i></button>
+        <button onclick="nextSlide()" class="absolute right-6 z-[110] p-4 rounded-full carousel-btn text-white/50 hover:text-white"><i data-lucide="chevron-right" class="w-10 h-10"></i></button>
+        <div class="relative max-w-6xl w-full h-full flex flex-col justify-center text-center">
+            <img id="carousel-img" src="" class="max-h-[75vh] w-full object-contain rounded-[3rem] shadow-2xl ring-1 ring-white/10 mx-auto transition-opacity duration-300">
+            <div class="mt-8 text-white">
+                <div id="carousel-category" class="text-[11px] font-black uppercase tracking-[0.6em] text-[#f43f5e] mb-4 text-center"></div>
+                <h4 id="carousel-title" class="text-5xl font-display uppercase tracking-tighter leading-none text-center"></h4>
+                <p class="text-gray-500 mt-8 text-[10px] uppercase font-black tracking-widest text-center">On-site high-resolution file hosting.</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Carousel functionality
-        const carousel = {
-            currentIndex: 0,
-            totalItems: 5,
-            autoPlayInterval: null,
-            
-            init() {
-                this.createIndicators();
-                this.bindEvents();
-                this.startAutoPlay();
-            },
-            
-            createIndicators() {
-                const indicatorsContainer = document.getElementById('indicators');
-                for (let i = 0; i < this.totalItems; i++) {
-                    const indicator = document.createElement('div');
-                    indicator.className = 'indicator' + (i === 0 ? ' active' : '');
-                    indicator.addEventListener('click', () => this.goToSlide(i));
-                    indicatorsContainer.appendChild(indicator);
+        lucide.createIcons();
+
+        // --- NAMING CONVENTION CONFIG ---
+        // Name your images like: portal-1.jpg, mosaic-1.jpg, etc.
+        const categories = [
+            { id: 'portal', prefix: 'images/portal-', title: 'The Simulation Door', categoryName: 'Signature Portals', maxCount: 20 },
+            { id: 'mosaic', prefix: 'images/mosaic-', title: 'Articulated Wall Piece', categoryName: 'Bespoke Mosaics', maxCount: 20 },
+            { id: 'backdrop', prefix: 'images/backdrop-', title: 'Instant Environment', categoryName: 'Camera Backdrops', maxCount: 20 },
+            { id: 'photo', prefix: 'images/photo-', title: 'Museum Grade Photo', categoryName: 'High-Def Photo', maxCount: 20 }
+        ];
+
+        let allImages = [];
+        let currentSlideIndex = 0;
+
+        async function initGallery() {
+            allImages = []; // Reset
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = '';
+
+            for (const cat of categories) {
+                // We add the first image of each category to the grid as a "cover"
+                const firstImgPath = `${cat.prefix}1.jpg`;
+                
+                // Add to our full carousel list
+                // Since we don't know how many exist, we probe up to maxCount
+                for (let i = 1; i <= cat.maxCount; i++) {
+                    allImages.push({
+                        img: `${cat.prefix}${i}.jpg`,
+                        title: cat.title,
+                        category: cat.categoryName
+                    });
                 }
-            },
-            
-            bindEvents() {
-                document.getElementById('prevBtn').addEventListener('click', () => this.prev());
-                document.getElementById('nextBtn').addEventListener('click', () => this.next());
-                
-                // Pause on hover
-                const wrapper = document.querySelector('.carousel-wrapper');
-                wrapper.addEventListener('mouseenter', () => this.stopAutoPlay());
-                wrapper.addEventListener('mouseleave', () => this.startAutoPlay());
-            },
-            
-            updateCarousel() {
-                const carouselInner = document.getElementById('carouselInner');
-                const offset = -this.currentIndex * 100;
-                carouselInner.style.transform = `translateX(${offset}%)`;
-                
-                // Update indicators
-                document.querySelectorAll('.indicator').forEach((ind, idx) => {
-                    ind.classList.toggle('active', idx === this.currentIndex);
-                });
-            },
-            
-            next() {
-                this.currentIndex = (this.currentIndex + 1) % this.totalItems;
-                this.updateCarousel();
-            },
-            
-            prev() {
-                this.currentIndex = (this.currentIndex - 1 + this.totalItems) % this.totalItems;
-                this.updateCarousel();
-            },
-            
-            goToSlide(index) {
-                this.currentIndex = index;
-                this.updateCarousel();
-            },
-            
-            startAutoPlay() {
-                this.autoPlayInterval = setInterval(() => this.next(), 4000);
-            },
-            
-            stopAutoPlay() {
-                clearInterval(this.autoPlayInterval);
+
+                // Render the cover card
+                const card = document.createElement('div');
+                card.className = "group relative aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden border border-black/5 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer";
+                card.onclick = () => openCarousel(allImages.findIndex(img => img.img === firstImgPath));
+                card.innerHTML = `
+                    <img src="${firstImgPath}" alt="${cat.title}" class="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000" onerror="this.parentElement.style.display='none'">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="absolute bottom-8 left-8 right-8 text-white">
+                        <div class="text-[9px] font-black uppercase tracking-[0.3em] text-[#f43f5e] mb-2">${cat.categoryName}</div>
+                        <div class="text-xl font-display uppercase leading-none tracking-tighter">${cat.title}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
             }
-        };
-        
-        // Initialize carousel when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            carousel.init();
-        });
+        }
 
-        // Hamburger menu functionality
-        const navToggle = document.querySelector('.nav-toggle');
-        const navLinks = document.getElementById('nav-links');
-        navToggle.addEventListener('click', () => {
-            document.body.classList.toggle('nav-open');
-            navLinks.classList.toggle('active');
-        });
+        // Carousel Logic
+        function openCarousel(index) {
+            currentSlideIndex = index;
+            updateCarousel();
+            document.getElementById('carousel-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeCarousel() { document.getElementById('carousel-modal').classList.add('hidden'); document.body.style.overflow = 'auto'; }
+        function nextSlide() { currentSlideIndex = (currentSlideIndex + 1) % allImages.length; updateCarousel(); }
+        function prevSlide() { currentSlideIndex = (currentSlideIndex - 1 + allImages.length) % allImages.length; updateCarousel(); }
+        function updateCarousel() {
+            const item = allImages[currentSlideIndex];
+            const imgEl = document.getElementById('carousel-img');
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                imgEl.src = item.img;
+                document.getElementById('carousel-title').innerText = item.title;
+                document.getElementById('carousel-category').innerText = item.category;
+                imgEl.style.opacity = '1';
+            }, 150);
+        }
 
-        // Add smooth scroll behavior
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
+        // Scale Calculator
+        let currentRollWidth = 36;
+        let currentConstraint = 'width';
+        let currentMethod = 'ratio';
 
-        // Add hover effect to feature cards
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.addEventListener('mouseover', function() {
-                this.style.transform = 'translateY(-10px)';
-            });
-            card.addEventListener('mouseout', function() {
-                this.style.transform = 'translateY(0)';
-            });
+        function setRollWidth(w) {
+            currentRollWidth = w;
+            document.querySelectorAll('.roll-btn').forEach(btn => btn.className = 'roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all hover:bg-black hover:text-white');
+            document.getElementById('btn-' + w).className = 'roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg bg-black text-white';
+            calculateScale();
+        }
+        function setConstraint(c) {
+            currentConstraint = c;
+            document.querySelectorAll('.constrain-btn').forEach(btn => btn.className = 'constrain-btn px-4 py-2 rounded-lg border-2 border-black font-bold text-sm hover:bg-black hover:text-white');
+            document.getElementById('btn-constrain-' + c).className = 'constrain-btn px-4 py-2 rounded-lg border-2 border-black font-bold text-sm bg-black text-white';
+            calculateScale();
+        }
+        function toggleMethod(m) {
+            currentMethod = m;
+            document.getElementById('ratio-inputs').classList.toggle('hidden', m !== 'ratio');
+            document.getElementById('pixel-inputs').classList.toggle('hidden', m !== 'pixels');
+            calculateScale();
+        }
+        function calculateScale() {
+            let userW = parseFloat(document.getElementById(currentMethod === 'ratio' ? 'ratio-w' : 'pixel-w').value) || 1;
+            let userH = parseFloat(document.getElementById(currentMethod === 'ratio' ? 'ratio-h' : 'pixel-h').value) || 1;
+            const aspect = userW / userH;
+            let printW = currentConstraint === 'width' ? currentRollWidth : currentRollWidth * aspect;
+            let printH = currentConstraint === 'width' ? currentRollWidth / aspect : currentRollWidth;
+            document.getElementById('result-text').innerText = `${printW.toFixed(1)}" x ${printH.toFixed(1)}"`;
+            const frame = document.getElementById('preview-frame');
+            frame.style.width = aspect > 1 ? '100%' : (100 * aspect) + '%';
+            frame.style.height = aspect > 1 ? (100 / aspect) + '%' : '100%';
+            document.getElementById('orientation-label').innerText = aspect > 1 ? 'Landscape' : 'Portrait';
+        }
+
+        initGallery();
+        calculateScale();
+
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('carousel-modal').classList.contains('hidden')) return;
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key === 'Escape') closeCarousel();
         });
     </script>
 </body>
-</html> 
+</html>

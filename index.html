@@ -453,62 +453,6 @@
     <script>
         lucide.createIcons();
 
-        // --- NAMING CONVENTION CONFIG ---
-        const categories = [
-            { id: 'portal', prefix: 'images/portal-', title: 'The Simulation Door', categoryName: 'Signature Portals', maxCount: 10 },
-            { id: 'mosaic', prefix: 'images/mosaic-', title: 'Articulated Wall Piece', categoryName: 'Bespoke Mosaics', maxCount: 10 },
-            { id: 'backdrop', prefix: 'images/backdrop-', title: 'Instant Environment', categoryName: 'Camera Backdrops', maxCount: 10 },
-            { id: 'photo', prefix: 'images/photo-', title: 'Museum Grade Photo', categoryName: 'High-Def Photo', maxCount: 10 }
-        ];
-
-        let allImages = [];
-        let currentSlideIndex = 0;
-
-        async function initGallery() {
-            allImages = []; 
-            const grid = document.getElementById('gallery-grid');
-            grid.innerHTML = '';
-            for (const cat of categories) {
-                const firstImgPath = `${cat.prefix}1.jpg`;
-                for (let i = 1; i <= cat.maxCount; i++) {
-                    allImages.push({ img: `${cat.prefix}${i}.jpg`, title: cat.title, category: cat.categoryName });
-                }
-                const card = document.createElement('div');
-                card.className = "group relative aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden border border-black/5 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer text-left";
-                card.onclick = () => openCarousel(allImages.findIndex(img => img.img === firstImgPath));
-                card.innerHTML = `
-                    <img src="${firstImgPath}" alt="${cat.title}" class="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 text-left" onerror="this.src='https://via.placeholder.com/600x800?text=${cat.id}'; this.parentElement.style.opacity='0.5';">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity text-left"></div>
-                    <div class="absolute bottom-8 left-8 right-8 text-white text-left">
-                        <div class="text-[9px] font-black uppercase tracking-[0.3em] text-[#f43f5e] mb-2 text-left">${cat.categoryName}</div>
-                        <div class="text-xl font-display uppercase leading-none tracking-tighter text-left">${cat.title}</div>
-                    </div>`;
-                grid.appendChild(card);
-            }
-        }
-
-        // Carousel 
-        function openCarousel(index) {
-            currentSlideIndex = index;
-            updateCarousel();
-            document.getElementById('carousel-modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeCarousel() { document.getElementById('carousel-modal').classList.add('hidden'); document.body.style.overflow = 'auto'; }
-        function nextSlide() { currentSlideIndex = (currentSlideIndex + 1) % allImages.length; updateCarousel(); }
-        function prevSlide() { currentSlideIndex = (currentSlideIndex - 1 + allImages.length) % allImages.length; updateCarousel(); }
-        function updateCarousel() {
-            const item = allImages[currentSlideIndex];
-            const imgEl = document.getElementById('carousel-img');
-            imgEl.style.opacity = '0';
-            setTimeout(() => {
-                imgEl.src = item.img;
-                document.getElementById('carousel-title').innerText = item.title;
-                document.getElementById('carousel-category').innerText = item.category;
-                imgEl.style.opacity = '1';
-            }, 150);
-        }
-
         // Scale Calculator State
         let currentRollWidth = 36;
         let currentConstraint = 'width';

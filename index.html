@@ -8,17 +8,16 @@
     <title>Pwint | Custom Mosaics & Immersive Large Format</title>
     <meta name="description" content="We've updated our studio to make it easier for you to size your art. Professional large format printing for mosaics, portals, and high-fidelity posters.">
     
-    <!-- Facebook / Meta / iMessage / LinkedIn -->
+    <!-- Facebook / iMessage / Meta -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://pwint.ca/">
     <meta property="og:title" content="Pwint | Specialized Large Format Studio">
-    <meta property="og:description" content="Vivid color. Massive scale. Precision output. Use our Scale Lab to size your art perfectly before you print.">
+    <meta property="og:description" content="Vivid color. Massive scale. Precision output. Use our Scale Lab to size your art perfectly before you print. Open when others are closed.">
     <meta property="og:image" content="https://pwint.ca/images/hero-machine.jpg">
     <meta property="og:site_name" content="Pwint">
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="images/favicon.png">
-    <link rel="apple-touch-icon" href="images/favicon.png">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%23f43f5e%22/></svg>">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -28,15 +27,16 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fffdf5; }
         .font-display { font-family: 'Bricolage Grotesque', sans-serif; }
         
+        /* Classic Crosshair Drift */
         .target-drift { 
             animation: slow-drift 15s ease-in-out infinite;
         }
         
         @keyframes slow-drift {
             0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(12px, -8px); }
-            50% { transform: translate(-6px, 14px); }
-            75% { transform: translate(-10px, -4px); }
+            25% { transform: translate(6px, -4px); }
+            50% { transform: translate(-3px, 5px); }
+            75% { transform: translate(-5px, -2px); }
         }
 
         .ink-blob {
@@ -48,12 +48,8 @@
         }
         .blob-cyan { background: #00aeef; width: 600px; height: 600px; top: -200px; left: -100px; }
         .blob-magenta { background: #ec008c; width: 650px; height: 650px; bottom: -100px; right: -50px; }
-        .blob-yellow { background: #fff200; width: 450px; height: 450px; top: 35%; left: 25%; }
 
         .pop-shadow { box-shadow: 12px 12px 0px 0px #1a1a1a; }
-        .pop-shadow-teal { box-shadow: 12px 12px 0px 0px #0d9488; }
-        .pop-shadow-coral { box-shadow: 12px 12px 0px 0px #f43f5e; }
-
         .glass-card {
             background: rgba(255, 255, 255, 0.4);
             backdrop-filter: blur(14px);
@@ -71,18 +67,23 @@
         }
         .calc-input:focus { border-color: #f43f5e; box-shadow: 4px 4px 0px 0px #f43f5e; }
         
-        .preview-box {
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-            background: #1a1a1a;
-            position: relative;
+        /* Dynamic Preview Box */
+        #preview-frame {
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background-color: #1a1a1a;
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
+            /* Flex center for the label */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #fffdf5; }
         ::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; }
-
+        
         .carousel-btn {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(8px);
@@ -96,12 +97,12 @@
 
     <div class="ink-blob blob-cyan animate-pulse"></div>
     <div class="ink-blob blob-magenta"></div>
-    <div class="ink-blob blob-yellow"></div>
 
     <!-- Navigation -->
     <nav class="fixed w-full z-50 px-6 py-6 text-left">
-        <div class="max-w-7xl mx-auto flex justify-between items-center bg-white/40 backdrop-blur-xl border border-black/5 rounded-3xl px-8 py-4 shadow-sm text-left">
+        <div class="max-w-7xl mx-auto flex justify-between items-center bg-white/40 backdrop-blur-xl border border-black/5 rounded-3xl px-8 py-4 shadow-sm">
             <div class="flex items-center gap-4 cursor-pointer group" onclick="window.scrollTo(0,0)">
+                <!-- CLASSIC CROSSHAIR LOGO -->
                 <svg viewBox="0 0 100 100" class="w-12 h-12 text-[#1a1a1a]" fill="none">
                     <circle cx="50" cy="50" r="18" stroke="currentColor" stroke-width="5" />
                     <line x1="50" y1="5" x2="50" y2="95" stroke="currentColor" stroke-width="1.5" />
@@ -119,7 +120,7 @@
             
             <div class="hidden md:flex gap-10 items-center text-[10px] font-bold uppercase tracking-widest text-[#5c5c5c]">
                 <a href="#specialties" class="hover:text-[#f43f5e] transition-colors">Services</a>
-                <a href="#scale-lab" class="hover:text-[#f43f5e] transition-colors text-[#f43f5e]">Scale Lab</a>
+                <a href="#scale-lab" class="hover:text-[#f43f5e] transition-colors">Scale Lab</a>
                 <a href="#showcase" class="hover:text-[#f43f5e] transition-colors">Showcase</a>
                 <a href="#rates" class="hover:text-[#f43f5e] transition-colors">Rates</a>
                 <a href="tel:6135138457" class="bg-[#1a1a1a] text-white px-6 py-3 rounded-full hover:bg-[#f43f5e] transition-all shadow-lg flex items-center gap-2">
@@ -177,8 +178,8 @@
         </div>
     </section>
 
-    <!-- Capabilities Section -->
-    <section id="specialties" class="py-32 px-6 max-w-7xl mx-auto z-10 relative border-t border-black/5 text-left">
+    <!-- Capabilities -->
+    <section id="specialties" class="py-32 px-6 max-w-7xl mx-auto border-t border-black/5 text-left">
         <div class="mb-24 flex flex-col md:flex-row justify-between items-end gap-8 text-left">
             <div class="max-w-xl text-left">
                 <h2 class="text-5xl font-display tracking-tight uppercase leading-none text-[#1a1a1a] mb-6">The Full <br/> <span class="text-[#0d9488]">Manifest.</span></h2>
@@ -189,9 +190,9 @@
             </div>
         </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10 text-left">
             <div class="glass-card p-12 rounded-[4rem] group hover:bg-white transition-all duration-500 border-2 border-transparent hover:border-[#1a1a1a] hover:pop-shadow text-left overflow-hidden">
-                <div class="w-16 h-16 bg-[#fbbf24]/10 text-[#d97706] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left"><i data-lucide="layers"></i></div>
+                <div class="w-16 h-16 bg-[#fbbf24]/10 text-[#d97706] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform"><i data-lucide="layers"></i></div>
                 <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-left">Custom Mosaics</h3>
                 <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium">Visual impact designs woven into massive, high-res physical statements for any room.</p>
                 <div class="text-[10px] font-black uppercase tracking-widest text-yellow-600">$250-$500 / Project</div>
@@ -199,37 +200,37 @@
 
             <div class="bg-[#1a1a1a] p-12 rounded-[4rem] text-white group hover:scale-[1.02] transition-all duration-500 shadow-2xl relative overflow-hidden text-left">
                 <div class="w-16 h-16 bg-white/10 text-[#f43f5e] rounded-3xl flex items-center justify-center mb-10 text-left"><i data-lucide="door-open"></i></div>
-                <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-white">Simulated Portals</h3>
-                <p class="text-sm leading-relaxed text-gray-400 mb-8 font-medium">36" woven adhesive fabric. Sticks perfectly, removes with zero residue.</p>
+                <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-white text-left">Simulated Portals</h3>
+                <p class="text-sm leading-relaxed text-gray-400 mb-8 font-medium text-left">36" woven adhesive fabric. Sticks perfectly, removes with zero residue.</p>
                 <div class="text-[10px] font-black uppercase tracking-widest text-[#f43f5e]">$150 Fixed Rate</div>
             </div>
 
             <div class="glass-card p-12 rounded-[4rem] group hover:bg-white transition-all duration-500 border-2 border-transparent hover:border-[#1a1a1a] hover:pop-shadow text-left overflow-hidden">
-                <div class="w-16 h-16 bg-[#0d9488]/10 text-[#0d9488] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left text-left"><i data-lucide="video"></i></div>
+                <div class="w-16 h-16 bg-[#0d9488]/10 text-[#0d9488] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left"><i data-lucide="video"></i></div>
                 <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-left">Studio Backdrops</h3>
-                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium">Large custom 42" tall backdrops for video chat. Specialized non-reflective media.</p>
+                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium text-left">Large custom 42" tall backdrops for video chat. Specialized non-reflective media.</p>
                 <div class="text-[10px] font-black uppercase tracking-widest text-[#0d9488]">$200 Fixed Rate</div>
             </div>
 
             <div class="glass-card p-12 rounded-[4rem] group hover:bg-white transition-all duration-500 border-2 border-transparent hover:border-[#1a1a1a] hover:pop-shadow text-left overflow-hidden">
-                <div class="w-16 h-16 bg-[#6366f1]/10 text-[#6366f1] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left text-left text-left"><i data-lucide="camera"></i></div>
+                <div class="w-16 h-16 bg-[#6366f1]/10 text-[#6366f1] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left"><i data-lucide="camera"></i></div>
                 <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-left">Photo Posters</h3>
-                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium font-medium">Museum-quality 24" wide prints. Genuine HP pigment inks for absolute resolution.</p>
+                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium font-medium text-left">Museum-quality 24" wide prints. Genuine HP pigment inks.</p>
                 <div class="text-[10px] font-black uppercase tracking-widest text-[#6366f1]">$50 for 24x18"</div>
             </div>
 
             <div class="glass-card p-12 rounded-[4rem] group hover:bg-white transition-all duration-500 border-2 border-transparent hover:border-[#1a1a1a] hover:pop-shadow text-left overflow-hidden">
-                <div class="w-16 h-16 bg-[#f43f5e]/10 text-[#f43f5e] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left text-left text-left text-left"><i data-lucide="maximize"></i></div>
+                <div class="w-16 h-16 bg-[#f43f5e]/10 text-[#f43f5e] rounded-3xl flex items-center justify-center mb-10 group-hover:scale-110 transition-transform text-left"><i data-lucide="maximize"></i></div>
                 <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-left">Heavy Posters</h3>
-                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium text-left">Up to 42" wide commercial-grade prints for advertising and high-fidelity displays.</p>
+                <p class="text-sm leading-relaxed text-[#4b5563] mb-8 font-medium text-left">Up to 42" wide posters. Durable prints built for advertising and display.</p>
                 <div class="text-[10px] font-black uppercase tracking-widest text-[#f43f5e]">Best for Bulk</div>
             </div>
 
             <div class="bg-[#f5e6d3] p-12 rounded-[4rem] group border-2 border-transparent hover:border-black hover:pop-shadow transition-all text-left">
-                <div class="w-16 h-16 bg-white text-[#0d9488] rounded-3xl flex items-center justify-center mb-10 text-left text-left text-left text-left text-left"><i data-lucide="file-text"></i></div>
+                <div class="w-16 h-16 bg-white text-[#0d9488] rounded-3xl flex items-center justify-center mb-10 text-left"><i data-lucide="file-text"></i></div>
                 <h3 class="text-3xl font-display uppercase tracking-tighter mb-4 leading-none text-[#1a1a1a] text-left">Laser Docs</h3>
                 <p class="text-sm leading-relaxed text-[#5c5852] mb-8 font-medium italic text-left">Vibrant A4 output. $0.75 per page. $10 minimum. <span class="font-bold underline text-[#1a1a1a]">Min. order waived with prints.</span></p>
-                <div class="text-[10px] font-black uppercase tracking-widest text-black/40 text-left">High Volume Ready</div>
+                <div class="text-[10px] font-black uppercase tracking-widest text-black/40">High Volume Ready</div>
             </div>
         </div>
     </section>
@@ -237,27 +238,27 @@
     <!-- Scale Lab Section -->
     <section id="scale-lab" class="py-32 px-6 max-w-7xl mx-auto z-10 relative text-left">
         <div class="p-12 md:p-20 bg-white border-2 border-black pop-shadow rounded-[5rem] overflow-hidden relative text-left">
-            <div class="grid lg:grid-cols-2 gap-20 items-start text-left text-left text-left">
+            <div class="grid lg:grid-cols-2 gap-20 items-start text-left">
                 <div class="text-left relative z-10">
-                    <div class="inline-block px-3 py-1 bg-[#0d9488] text-white text-[9px] font-bold uppercase tracking-widest mb-6 rounded-full">Pro Tool</div>
-                    <h2 class="text-5xl font-display tracking-tight uppercase leading-none text-[#1a1a1a] mb-6">Scale <br/><span class="text-[#f43f5e]">Calculator.</span></h2>
+                    <div class="inline-block px-3 py-1 bg-[#0d9488] text-white text-[9px] font-bold uppercase tracking-widest mb-6 rounded-full text-left">Pro Tool</div>
+                    <h2 class="text-5xl font-display tracking-tight uppercase leading-none text-[#1a1a1a] mb-6 text-left">Scale <br/><span class="text-[#f43f5e]">Calculator.</span></h2>
                     <p class="text-lg font-medium text-[#4b5563] mb-12 italic text-left">Simulate your print scale instantly. Upload your art to see exactly how it fits our rolls.</p>
                     
                     <div class="space-y-8 text-left">
                         <div>
-                            <label class="text-[10px] font-black uppercase tracking-widest mb-3 block text-gray-400">Step 1: Choose Roll Width</label>
-                            <div class="flex flex-wrap gap-4">
-                                <button onclick="setRollWidth(24)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all hover:bg-black hover:text-white" id="btn-24">24"</button>
-                                <button onclick="setRollWidth(36)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all bg-black text-white" id="btn-36">36"</button>
-                                <button onclick="setRollWidth(42)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all hover:bg-black hover:text-white" id="btn-42">42"</button>
+                            <label class="text-[10px] font-black uppercase tracking-widest mb-3 block text-gray-400 text-left">1. Choose Roll Width</label>
+                            <div class="flex flex-wrap gap-4 text-left">
+                                <button onclick="setRollWidth(24)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all hover:bg-black hover:text-white text-left" id="btn-24">24"</button>
+                                <button onclick="setRollWidth(36)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all bg-black text-white text-left" id="btn-36">36"</button>
+                                <button onclick="setRollWidth(42)" class="roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all hover:bg-black hover:text-white text-left" id="btn-42">42"</button>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="text-[10px] font-black uppercase tracking-widest mb-3 block text-gray-400">Step 2: Constraint Mode</label>
+                        <div class="text-left">
+                            <label class="text-[10px] font-black uppercase tracking-widest mb-3 block text-gray-400 text-left">2. Constraint Mode (Orientation)</label>
                             <div class="flex flex-wrap gap-4 text-left">
-                                <button onclick="setConstraint('width')" class="constrain-btn px-4 py-2 rounded-lg border-2 border-black font-bold text-sm bg-black text-white text-left" id="btn-constrain-width">Fit to Width</button>
-                                <button onclick="setConstraint('height')" class="constrain-btn px-4 py-2 rounded-lg border-2 border-black font-bold text-sm transition-all hover:bg-black hover:text-white text-left" id="btn-constrain-height">Fit to Height (Tall)</button>
+                                <button onclick="setConstraint('width')" class="constrain-btn px-4 py-3 rounded-xl border-2 border-black font-bold text-sm bg-black text-white text-left" id="btn-constrain-width">Fit to Width (Landscape)</button>
+                                <button onclick="setConstraint('height')" class="constrain-btn px-4 py-3 rounded-xl border-2 border-black font-bold text-sm transition-all hover:bg-black hover:text-white text-left" id="btn-constrain-height">Fit to Height (Tall/Portrait)</button>
                             </div>
                         </div>
 
@@ -270,16 +271,16 @@
                             </label>
                         </div>
 
-                        <div id="ratio-inputs" class="flex gap-4 items-center">
-                            <input type="number" id="ratio-w" class="calc-input w-full" value="16" oninput="calculateScale()">
-                            <span class="font-black text-2xl">:</span>
+                        <div id="ratio-inputs" class="flex gap-4 items-center text-left">
+                            <input type="number" id="ratio-w" class="calc-input w-full text-left" value="16" oninput="calculateScale()">
+                            <span class="font-black text-2xl text-left">:</span>
                             <input type="number" id="ratio-h" class="calc-input w-full text-left" value="9" oninput="calculateScale()">
                         </div>
 
-                        <div id="pixel-inputs" class="hidden flex gap-4 items-center">
-                            <input type="number" id="pixel-w" placeholder="Width Pixels" class="calc-input w-full text-left" value="3000" oninput="calculateScale()">
-                            <span class="font-black text-xl text-gray-300">x</span>
-                            <input type="number" id="pixel-h" placeholder="Height Pixels" class="calc-input w-full text-left" value="2000" oninput="calculateScale()">
+                        <div id="pixel-inputs" class="hidden flex gap-4 items-center text-left">
+                            <input type="number" id="pixel-w" placeholder="Width" class="calc-input w-full text-left" value="3000" oninput="calculateScale()">
+                            <span class="font-black text-xl text-gray-300 text-left">x</span>
+                            <input type="number" id="pixel-h" placeholder="Height" class="calc-input w-full text-left" value="2000" oninput="calculateScale()">
                         </div>
 
                         <div class="pt-4 text-left">
@@ -291,13 +292,14 @@
                     </div>
                 </div>
 
-                <div class="relative flex flex-col items-center justify-center h-full min-h-[400px] text-left">
-                    <div class="text-left w-full mb-12 text-left text-left">
+                <div class="relative flex flex-col items-center justify-center h-full min-h-[400px]">
+                    <div class="text-left w-full mb-12 text-left">
                         <div class="text-[10px] font-black uppercase tracking-widest text-[#0d9488] mb-2 text-left">Calculated Print Dimensions</div>
                         <div id="result-text" class="text-6xl font-display tracking-tighter italic text-[#1a1a1a] text-left">36" x 20.2"</div>
                     </div>
-                    <div class="w-full h-[350px] bg-black/5 rounded-[3rem] border-2 border-dashed border-black/10 flex items-center justify-center p-8 relative overflow-hidden text-left">
-                        <!-- THE PREVIEW CONTAINER -->
+                    <!-- Dynamic Container -->
+                    <div class="w-full h-[400px] bg-black/5 rounded-[3rem] border-2 border-dashed border-black/10 flex items-center justify-center p-8 relative overflow-hidden">
+                        <!-- THE DYNAMIC PREVIEW BOX -->
                         <div id="preview-frame" class="preview-box border-2 border-black pop-shadow-coral flex items-center justify-center overflow-hidden">
                             <div class="text-[10px] font-black text-white/20 uppercase tracking-widest text-left" id="orientation-label">Landscape</div>
                         </div>
@@ -307,15 +309,54 @@
         </div>
     </section>
 
-    <!-- Showcase Gallery -->
-    <section id="showcase" class="py-32 px-6 max-w-7xl mx-auto z-10 relative text-left">
-        <div class="mb-20 flex flex-col md:flex-row justify-between items-end gap-8 text-left text-left">
-            <div class="max-w-xl text-left">
-                <h2 class="text-5xl font-display tracking-tight uppercase leading-none text-[#1a1a1a] mb-6 italic text-left">The Showcase.</h2>
-                <p class="text-lg font-medium text-[#4b5563] italic border-l-4 border-[#0d9488] pl-8 text-left">"Vibrant previews of past projects. All specialized output is high-fidelity."</p>
+    <!-- The Quality Audit -->
+    <section id="quality" class="bg-[#1a1a1a] text-white py-32 px-6 rounded-[5rem] mx-4 shadow-3xl relative overflow-hidden text-left">
+        <div class="max-w-5xl mx-auto grid lg:grid-cols-2 gap-20 items-center text-left">
+            <div class="text-left">
+                <h2 class="text-5xl md:text-7xl font-display tracking-tighter mb-8 leading-none italic text-[#f43f5e] text-left">We don't just "Hit Print."</h2>
+                <p class="text-gray-400 text-lg mb-10 leading-relaxed font-medium text-left">
+                    At <span class="text-white font-bold underline decoration-[#f43f5e] text-left">Pwint</span>, we verify your files before toner is spent to ensure they will come out as expected.
+                </p>
+                <div class="space-y-6 text-left">
+                    <div class="flex gap-4 group text-left">
+                        <i data-lucide="scan-eye" class="text-[#0d9488] w-6 h-6 shrink-0 group-hover:scale-110 transition-transform text-left"></i>
+                        <div class="text-left">
+                            <div class="font-bold text-sm uppercase tracking-widest text-left">Resolution Check</div>
+                            <div class="text-gray-500 text-xs mt-1 text-left">Verifying PPI to ensure sharp details at your desired size.</div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 group text-left">
+                        <i data-lucide="scale" class="text-[#0d9488] w-6 h-6 shrink-0 group-hover:scale-110 transition-transform text-left"></i>
+                        <div class="text-left">
+                            <div class="font-bold text-sm uppercase tracking-widest text-left">Aspect Ratio Alignment</div>
+                            <div class="text-gray-500 text-xs mt-1 text-balance text-left">No stretching or awkward cropping. Geometric integrity guaranteed.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white/5 p-12 rounded-[4rem] border border-white/10 backdrop-blur-md text-left">
+                <i data-lucide="timer" class="w-12 h-12 text-[#f43f5e] mb-8 text-left"></i>
+                <h3 class="text-4xl font-display mb-4 tracking-tighter uppercase italic text-left">FAST Turnaround!</h3>
+                <p class="text-gray-400 leading-relaxed text-sm mb-10 font-medium italic text-left">
+                    Acknowledgment to pickup within 60 minutes for most specialized projects.
+                </p>
+                <div class="p-6 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-4 text-left">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse text-left"></div>
+                    <span class="text-[10px] font-black uppercase tracking-[0.4em] text-left">Live Status: Studio Open Late</span>
+                </div>
             </div>
         </div>
-        <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    </section>
+
+    <!-- Showcase Gallery -->
+    <section id="showcase" class="py-32 px-6 max-w-7xl mx-auto z-10 relative text-left">
+        <div class="mb-20 flex flex-col md:flex-row justify-between items-end gap-8 text-left">
+            <div class="max-w-xl text-left">
+                <h2 class="text-5xl font-display tracking-tight uppercase leading-none text-[#1a1a1a] mb-6 italic text-left">The Showcase.</h2>
+                <p class="text-lg font-medium text-[#4b5563] italic border-l-4 border-[#0d9488] pl-8 text-left">"Vibrant previews of past projects hosted on-site."</p>
+            </div>
+        </div>
+        <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
             <!-- Dynamic Injection -->
         </div>
     </section>
@@ -323,48 +364,48 @@
     <!-- Rates Section -->
     <section id="rates" class="py-32 px-6 max-w-5xl mx-auto z-10 relative text-left">
         <div class="text-center mb-24 text-left">
-            <h2 class="text-6xl font-display tracking-tight uppercase mb-6 leading-none italic text-left text-left">Rate Manifest.</h2>
-            <p class="text-xl font-medium text-[#4b5563] text-left text-left">Linear-foot calculation for specialized media. Fair & Transparent.</p>
+            <h2 class="text-6xl font-display tracking-tight uppercase mb-6 leading-none italic text-left">Rate Manifest.</h2>
+            <p class="text-xl font-medium text-[#4b5563] text-left">Linear-foot calculation for specialized media. Fair & Transparent.</p>
         </div>
 
         <div class="bg-white rounded-[4rem] border-2 border-black pop-shadow overflow-hidden text-left">
             <div class="overflow-x-auto text-left">
-                <table class="w-full text-left text-left">
+                <table class="w-full text-left">
                     <thead>
                         <tr class="bg-black/5 border-b border-black/10 text-left">
-                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-left text-left">Substrate</th>
-                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-left text-left">Roll Width</th>
-                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-left text-left">Best Use</th>
-                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-right text-right">Rate</th>
+                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-left">Substrate</th>
+                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-left">Roll Width</th>
+                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-left">Best Use</th>
+                            <th class="p-10 text-[11px] font-black uppercase text-[#5c5c5c] text-right">Rate</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr class="border-b border-black/5 hover:bg-black/5 transition-colors">
+                        <tr class="border-b border-black/5 hover:bg-black/5 transition-colors text-left">
                             <td class="p-10 font-display text-2xl leading-none text-left">Self-Adhesive Woven Fabric</td>
                             <td class="p-10"><span class="px-5 py-2 bg-white border border-black/10 rounded-xl font-black text-xs text-left">36" Width</span></td>
                             <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40 text-left">Portals, Mosaics, Murals</td>
                             <td class="p-10 text-right font-display text-3xl text-[#f43f5e] italic tracking-tighter whitespace-nowrap text-right">$50 / ft</td>
                         </tr>
-                        <tr class="border-b border-black/5 hover:bg-black/5 transition-colors text-left text-left text-left text-left">
+                        <tr class="border-b border-black/5 hover:bg-black/5 transition-colors text-left">
                             <td class="p-10 font-display text-2xl leading-none uppercase tracking-tighter text-left">Heavy-Weight Media</td>
-                            <td class="p-10"><span class="px-5 py-2 bg-white border border-black/10 rounded-xl font-black text-xs text-left text-left">42" Width</span></td>
-                            <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40 text-left">Display Posters, Mosaics</td>
-                            <td class="p-10 text-right font-display text-3xl text-[#0d9488] italic tracking-tighter text-right text-right">$30 / ft</td>
+                            <td class="p-10"><span class="px-5 py-2 bg-white border border-black/10 rounded-xl font-black text-xs text-left">42" Width</span></td>
+                            <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40 text-left">Display Posters, Plans</td>
+                            <td class="p-10 text-right font-display text-3xl text-[#0d9488] italic tracking-tighter text-right">$30 / ft</td>
                         </tr>
                         <tr class="border-b border-black/5 hover:bg-black/5 transition-colors text-left">
                             <td class="p-10 font-display text-2xl leading-none uppercase tracking-tighter text-left">Professional Photo</td>
                             <td class="p-10"><span class="px-5 py-2 bg-white border border-black/10 rounded-xl font-black text-xs text-left">24" Width</span></td>
                             <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40 text-left">Art Grade Photo Prints</td>
-                            <td class="p-10 text-right font-display text-3xl text-black italic tracking-tighter text-right text-right">$30 / ft</td>
+                            <td class="p-10 text-right font-display text-3xl text-black italic tracking-tighter text-right">$30 / ft</td>
                         </tr>
-                        <tr class="hover:bg-black/5 transition-colors text-left text-left">
-                            <td class="p-10 text-left text-left">
-                                <div class="font-display text-2xl leading-none">Laser Color Document</div>
-                                <div class="text-[9px] uppercase tracking-widest text-[#f43f5e] mt-2 font-black underline decoration-2 text-left text-left">Min. order waived with prints</div>
+                        <tr class="hover:bg-black/5 transition-colors text-left">
+                            <td class="p-10 text-left">
+                                <div class="font-display text-2xl leading-none text-left">Laser Color Document</div>
+                                <div class="text-[9px] uppercase tracking-widest text-[#f43f5e] mt-2 font-black underline decoration-2 text-left">Min. order waived with prints</div>
                             </td>
-                            <td class="p-10 font-black text-left text-left text-left">A4 Size</td>
-                            <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40 text-left text-left">Color Reports ($10 Min)</td>
-                            <td class="p-10 text-right font-display text-3xl text-black italic tracking-tighter text-right text-right text-right">$0.75 / pg</td>
+                            <td class="p-10"><span class="px-5 py-2 bg-white border border-black/10 rounded-xl font-black text-xs text-left">A4 Size</span></td>
+                            <td class="p-10 text-[10px] font-black uppercase tracking-widest opacity-40 text-left">Color Reports ($10 Min)</td>
+                            <td class="p-10 text-right font-display text-3xl text-black italic tracking-tighter text-right">$0.75 / pg</td>
                         </tr>
                     </tbody>
                 </table>
@@ -372,10 +413,21 @@
         </div>
     </section>
 
+    <!-- Technical Note -->
+    <section class="py-24 px-6 max-w-4xl mx-auto text-center z-10 relative text-left">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-[2.5rem] bg-white border-2 border-black pop-shadow-teal mb-10 text-left">
+            <i data-lucide="hard-drive" class="text-[#0d9488] w-10 h-10 text-left"></i>
+        </div>
+        <h3 class="text-4xl font-display mb-8 tracking-tighter italic text-center text-left">"I preserve every pixel."</h3>
+        <p class="text-xl text-[#4b5563] leading-relaxed font-medium max-w-3xl mx-auto italic text-center text-left">
+            High-resolution projects create massive file sizes. To ensure zero loss in quality, I host and deliver all finished projects directly on-site at full fidelity.
+        </p>
+    </section>
+
     <!-- Footer -->
     <footer id="contact" class="pt-40 pb-20 px-6 max-w-7xl mx-auto text-left border-t border-black/10">
         <div class="grid lg:grid-cols-2 gap-40 text-left">
-            <div class="text-left text-left">
+            <div class="text-left">
                 <div class="flex items-center gap-6 mb-16 text-left">
                     <svg viewBox="0 0 100 100" class="w-24 h-24 text-[#1a1a1a]" fill="none">
                         <circle cx="50" cy="50" r="18" stroke="currentColor" stroke-width="5" />
@@ -394,34 +446,36 @@
                 
                 <div class="space-y-16 text-left">
                     <div class="grid grid-cols-2 gap-12 text-left">
-                        <div>
-                            <span class="block text-[10px] font-black uppercase tracking-widest text-[#f43f5e] mb-4">Availability</span>
+                        <div class="text-left">
+                            <span class="block text-[10px] font-black uppercase tracking-widest text-[#f43f5e] mb-4 text-left">Availability</span>
                             <span class="text-4xl font-display italic text-left">Mon-Fri 6-10 PM</span>
                         </div>
-                        <div>
+                        <div class="text-left">
                             <span class="block text-[10px] font-black uppercase tracking-widest text-[#f43f5e] mb-4 text-left">Weekends</span>
-                            <span class="text-4xl font-display italic text-left text-left">Sat-Sun 9-9</span>
+                            <span class="text-4xl font-display italic text-left">Sat-Sun 9-9</span>
                         </div>
                     </div>
-                    <p class="text-[#5c5c5c] italic text-xl border-l-4 border-[#0d9488] pl-10 leading-relaxed max-w-sm text-left">"Built for scale, delivered with precision."</p>
+                    <p class="text-[#5c5c5c] italic text-xl border-l-4 border-[#0d9488] pl-10 leading-relaxed max-w-sm text-left">
+                        "Built for scale, delivered with precision."
+                    </p>
                 </div>
             </div>
 
             <div class="bg-white p-12 md:p-24 rounded-[6rem] border-2 border-black pop-shadow-coral relative group text-left">
                 <h3 class="text-6xl font-display tracking-tighter uppercase italic mb-12 leading-none text-left">Ready?</h3>
-                <div class="space-y-12 relative z-10 text-left text-left">
+                <div class="space-y-12 relative z-10 text-left">
                     <a href="tel:6135138457" class="flex items-center gap-8 group/link text-left">
-                        <div class="w-16 h-16 rounded-3xl bg-[#1a1a1a] text-white flex items-center justify-center group-hover:bg-[#f43f5e] transition-all text-left"><i data-lucide="phone" class="w-8 h-8 text-left"></i></div>
-                        <div class="flex flex-col text-left text-left">
+                        <div class="w-20 h-20 rounded-3xl bg-[#1a1a1a] text-white flex items-center justify-center group-hover:bg-[#f43f5e] transition-all text-left"><i data-lucide="phone" class="w-10 h-10 text-left"></i></div>
+                        <div class="flex flex-col text-left">
                             <span class="text-[10px] font-black uppercase tracking-widest text-[#5c5c5c] text-left">Call / Text</span>
-                            <span class="font-display text-5xl tracking-tighter italic leading-none text-left text-left">613-513-8457</span>
+                            <span class="font-display text-5xl tracking-tighter italic leading-none text-left">613-513-8457</span>
                         </div>
                     </a>
-                    <div class="flex items-center gap-8 text-left text-left text-left">
-                        <div class="w-16 h-16 rounded-3xl bg-[#1a1a1a] text-white flex items-center justify-center text-left text-left"><i data-lucide="mail" class="w-8 h-8 text-left"></i></div>
+                    <div class="flex items-center gap-8 text-left">
+                        <div class="w-20 h-20 rounded-3xl bg-[#1a1a1a] text-white flex items-center justify-center text-left"><i data-lucide="mail" class="w-10 h-10 text-left"></i></div>
                         <div class="flex flex-col text-left">
                             <span class="text-[10px] font-black uppercase tracking-widest text-[#5c5c5c] text-left">Email</span>
-                            <span class="font-display text-5xl tracking-tighter italic leading-none text-left text-left">info@pwint.ca</span>
+                            <span class="font-display text-5xl tracking-tighter italic leading-none text-left">info@pwint.ca</span>
                         </div>
                     </div>
                     <a href="https://www.facebook.com/profile.php?id=61552493924266&sk=about" target="_blank" class="w-full bg-[#1a1a1a] text-white py-8 rounded-[3rem] font-bold text-2xl hover:bg-[#0d9488] transition-all shadow-2xl uppercase text-center block text-left">
@@ -430,19 +484,19 @@
                 </div>
             </div>
         </div>
-        <div class="mt-48 pt-16 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 text-left text-left">
+        <div class="mt-48 pt-16 border-t border-black/10 flex flex-col md:flex-row justify-between items-center gap-10 text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 text-left">
             <div>Pwint Canada © 2026</div>
         </div>
     </footer>
 
     <!-- Carousel Modal -->
     <div id="carousel-modal" class="fixed inset-0 z-[100] bg-black/98 backdrop-blur-2xl hidden flex items-center justify-center p-6 md:p-12 text-left">
-        <button onclick="closeCarousel()" class="absolute top-8 right-8 z-[110] text-white/50 hover:text-white transition-colors text-left text-left text-left"><i data-lucide="x" class="w-10 h-10 text-left"></i></button>
-        <button onclick="prevSlide()" class="absolute left-6 z-[110] p-4 rounded-full carousel-btn text-white/50 hover:text-white text-left text-left text-left"><i data-lucide="chevron-left" class="w-10 h-10 text-left"></i></button>
-        <button onclick="nextSlide()" class="absolute right-6 z-[110] p-4 rounded-full carousel-btn text-white/50 hover:text-white text-left text-left text-left"><i data-lucide="chevron-right" class="w-10 h-10 text-left"></i></button>
+        <button onclick="closeCarousel()" class="absolute top-8 right-8 z-[110] text-white/50 hover:text-white transition-colors text-left"><i data-lucide="x" class="w-10 h-10 text-left"></i></button>
+        <button onclick="prevSlide()" class="absolute left-6 z-[110] p-4 rounded-full carousel-btn text-white/50 hover:text-white text-left"><i data-lucide="chevron-left" class="w-10 h-10 text-left"></i></button>
+        <button onclick="nextSlide()" class="absolute right-6 z-[110] p-4 rounded-full carousel-btn text-white/50 hover:text-white text-left"><i data-lucide="chevron-right" class="w-10 h-10 text-left"></i></button>
         <div class="relative max-w-6xl w-full h-full flex flex-col justify-center text-center">
             <img id="carousel-img" src="" class="max-h-[75vh] w-full object-contain rounded-[3rem] shadow-2xl ring-1 ring-white/10 mx-auto transition-opacity duration-300 text-left">
-            <div class="mt-8 text-white">
+            <div class="mt-8 text-white text-center">
                 <div id="carousel-category" class="text-[11px] font-black uppercase tracking-[0.6em] text-[#f43f5e] mb-4 text-center"></div>
                 <h4 id="carousel-title" class="text-5xl font-display uppercase tracking-tighter leading-none text-center"></h4>
                 <p class="text-gray-500 mt-8 text-[10px] uppercase font-black tracking-widest text-center">Vivid Scale Manifested.</p>
@@ -453,22 +507,96 @@
     <script>
         lucide.createIcons();
 
-        // Scale Calculator State
+        // --- NAMING CONVENTION CONFIG ---
+        const categories = [
+            { id: 'portal', prefix: 'images/portal-', title: 'The Simulation Door', categoryName: 'Signature Portals', maxCount: 10 },
+            { id: 'mosaic', prefix: 'images/mosaic-', title: 'Articulated Wall Piece', categoryName: 'Bespoke Mosaics', maxCount: 10 },
+            { id: 'backdrop', prefix: 'images/backdrop-', title: 'Instant Environment', categoryName: 'Camera Backdrops', maxCount: 10 },
+            { id: 'photo', prefix: 'images/photo-', title: 'Museum Grade Photo', categoryName: 'High-Def Photo', maxCount: 10 }
+        ];
+
+        let allImages = [];
+        let currentSlideIndex = 0;
+
+        async function initGallery() {
+            allImages = []; 
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = '';
+            for (const cat of categories) {
+                let firstValidImg = null;
+                for (let i = 1; i <= cat.maxCount; i++) {
+                    const imgUrl = `${cat.prefix}${i}.jpg`;
+                    const exists = await checkImageExists(imgUrl);
+                    if (exists) {
+                        const item = { img: imgUrl, title: cat.title, category: cat.categoryName };
+                        allImages.push(item);
+                        if (!firstValidImg) firstValidImg = item;
+                    } else { break; }
+                }
+
+                if (firstValidImg) {
+                    const card = document.createElement('div');
+                    card.className = "group relative aspect-[3/4] bg-white rounded-[2.5rem] overflow-hidden border border-black/5 shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer text-left";
+                    card.onclick = () => openCarousel(allImages.findIndex(img => img.img === firstValidImg.img));
+                    card.innerHTML = `
+                        <img src="${firstValidImg.img}" alt="${cat.title}" class="w-full h-full object-cover grayscale-[30%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000 text-left">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-100 transition-opacity text-left"></div>
+                        <div class="absolute bottom-8 left-8 right-8 text-white text-left">
+                            <div class="text-[9px] font-black uppercase tracking-[0.3em] text-[#f43f5e] mb-2 text-left">${cat.categoryName}</div>
+                            <div class="text-xl font-display uppercase leading-none tracking-tighter text-left">${cat.title}</div>
+                        </div>`;
+                    grid.appendChild(card);
+                }
+            }
+        }
+
+        function checkImageExists(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(true);
+                img.onerror = () => resolve(false);
+                img.src = url;
+            });
+        }
+
+        function openCarousel(index) {
+            if (index === -1) return;
+            currentSlideIndex = index;
+            updateCarousel();
+            document.getElementById('carousel-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeCarousel() { document.getElementById('carousel-modal').classList.add('hidden'); document.body.style.overflow = 'auto'; }
+        function nextSlide() { currentSlideIndex = (currentSlideIndex + 1) % allImages.length; updateCarousel(); }
+        function prevSlide() { currentSlideIndex = (currentSlideIndex - 1 + allImages.length) % allImages.length; updateCarousel(); }
+        function updateCarousel() {
+            const item = allImages[currentSlideIndex];
+            const imgEl = document.getElementById('carousel-img');
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                imgEl.src = item.img;
+                document.getElementById('carousel-title').innerText = item.title;
+                document.getElementById('carousel-category').innerText = item.category;
+                imgEl.style.opacity = '1';
+            }, 150);
+        }
+
+        // Scale Calculator
         let currentRollWidth = 36;
-        let currentConstraint = 'width';
+        let currentConstraint = 'width'; // 'width' = Landscape Mode / 'height' = Portrait/Tall Mode
         let currentMethod = 'ratio';
 
         function setRollWidth(w) {
             currentRollWidth = w;
             document.querySelectorAll('.roll-btn').forEach(btn => btn.className = 'roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg transition-all hover:bg-black hover:text-white');
-            document.getElementById('btn-' + w).className = 'roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg bg-black text-white';
+            document.getElementById('btn-' + w).className = 'roll-btn px-6 py-3 rounded-xl border-2 border-black font-black text-lg bg-black text-white text-left';
             calculateScale();
         }
 
         function setConstraint(c) {
             currentConstraint = c;
-            document.querySelectorAll('.constrain-btn').forEach(btn => btn.className = 'constrain-btn px-4 py-2 rounded-lg border-2 border-black font-bold text-sm hover:bg-black hover:text-white');
-            document.getElementById('btn-constrain-' + c).className = 'constrain-btn px-4 py-2 rounded-lg border-2 border-black font-bold text-sm bg-black text-white';
+            document.querySelectorAll('.constrain-btn').forEach(btn => btn.className = 'constrain-btn px-4 py-3 rounded-xl border-2 border-black font-bold text-sm hover:bg-black hover:text-white text-left');
+            document.getElementById('btn-constrain-' + c).className = 'constrain-btn px-4 py-3 rounded-xl border-2 border-black font-bold text-sm bg-black text-white text-left';
             calculateScale();
         }
 
@@ -492,11 +620,16 @@
         function calculateScale() {
             let userW = parseFloat(document.getElementById(currentMethod === 'ratio' ? 'ratio-w' : 'pixel-w').value) || 1;
             let userH = parseFloat(document.getElementById(currentMethod === 'ratio' ? 'ratio-h' : 'pixel-h').value) || 1;
-            const aspect = userW / userH;
+            
+            // Calculate base aspect (input logic)
+            const aspect = userW / userH; 
             
             let printW, printH;
 
-            // BUG FIX: Accurate recalculation logic for rotation based on constraint
+            // Logic: 
+            // If 'width' constraint (Landscape) -> The print WIDTH matches Roll Width. Height calculates.
+            // If 'height' constraint (Tall) -> The print HEIGHT matches Roll Width. Width calculates.
+            
             if (currentConstraint === 'width') {
                 printW = currentRollWidth;
                 printH = currentRollWidth / aspect;
@@ -510,18 +643,21 @@
             const frame = document.getElementById('preview-frame');
             const label = document.getElementById('orientation-label');
             
-            // Constrain preview to the dashboard box aspect ratio
-            const dashboardAspect = 1.0; 
+            // VISUALIZATION LOGIC:
+            // We set the aspect ratio of the DIV to match the calculated Print Ratio.
+            // If Height Constraint is on (Tall), this effectively rotates the visualization.
             
-            if (aspect > 1) {
-                // Landscape
+            const finalAspect = printW / printH;
+
+            if (finalAspect > 1) {
+                // Wide / Landscape
                 frame.style.width = '100%';
-                frame.style.height = (100 / aspect) + '%';
+                frame.style.height = (100 / finalAspect) + '%';
                 if (label) label.innerText = 'Landscape View';
             } else {
-                // Portrait
+                // Tall / Portrait
                 frame.style.height = '100%';
-                frame.style.width = (100 * aspect) + '%';
+                frame.style.width = (100 * finalAspect) + '%';
                 if (label) label.innerText = 'Portrait View';
             }
         }
